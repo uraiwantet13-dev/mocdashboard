@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoC Management Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Plus Jakarta Sans & Prompt -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                            dark: '#032d23'
+                        },
+                        surface: '#F3F5F8',
+                        card: '#FFFFFF'
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Prompt', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 30px -5px rgba(6, 78, 59, 0.05)',
+                        'card': '0 4px 20px 0 rgba(0, 0, 0, 0.03)',
+                        'glow': '0 0 20px rgba(16, 185, 129, 0.2)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F3F5F8;
+            font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif;
+            color: #1E293B;
+        }
+        .chart-canvas-container {
+            position: relative;
+            width: 100%;
+            height: 220px;
+        }
+        /* Custom scrollbar for table */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1F5F9;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-3 md:p-6 text-slate-800">
+
+    <div class="max-w-[1600px] mx-auto flex flex-col md:flex-row gap-6">
+
+        <!-- Sidebar Navigation (Quixotic Style) -->
+        <aside class="w-full md:w-20 lg:w-24 bg-white rounded-3xl p-4 flex md:flex-col items-center justify-between shadow-card border border-slate-100 flex-shrink-0">
+            <div class="flex md:flex-col items-center gap-6 w-full">
+                <!-- Logo -->
+                <div class="flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-900 text-brand-500 text-xl font-bold">
+                    <i class="fa-solid fa-square-poll-vertical text-2xl"></i>
+                </div>
+
+                <!-- Nav Icons -->
+                <nav class="flex md:flex-col items-center gap-3 w-full justify-center">
+                    <button class="w-12 h-12 rounded-2xl bg-brand-900 text-white flex items-center justify-center transition-all shadow-md">
+                        <i class="fa-solid fa-chart-pie text-lg"></i>
+                    </button>
+                    <button class="w-12 h-12 rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-brand-900 flex items-center justify-center transition-all">
+                        <i class="fa-solid fa-folder-open text-lg"></i>
+                    </button>
+                    <button class="w-12 h-12 rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-brand-900 flex items-center justify-center transition-all">
+                        <i class="fa-solid fa-sliders text-lg"></i>
+                    </button>
+                    <button class="w-12 h-12 rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-brand-900 flex items-center justify-center transition-all">
+                        <i class="fa-solid fa-users text-lg"></i>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Profile Bottom -->
+            <div class="hidden md:flex flex-col items-center gap-4">
+                <button class="w-12 h-12 rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-brand-900 flex items-center justify-center transition-all">
+                    <i class="fa-solid fa-gear text-lg"></i>
+                </button>
+                <div class="w-10 h-10 rounded-full bg-brand-100 text-brand-900 font-bold flex items-center justify-center text-sm border-2 border-brand-500">
+                    AD
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col gap-6 overflow-hidden">
+
+            <!-- Top Bar Header -->
+            <header class="bg-white rounded-3xl p-4 md:px-6 md:py-4 shadow-card border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <h1 class="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2">
+                        <span>Management of Change</span>
+                        <span class="text-xs bg-brand-100 text-brand-800 font-semibold px-2.5 py-1 rounded-full">MoC PTO</span>
+                    </h1>
+                </div>
+
+                <!-- Global Search & Control -->
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <!-- Search Input -->
+                    <div class="relative flex-1 md:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="searchInput" placeholder="Search MoC No, Title, Owner..." 
+                            class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
+                    </div>
+
+                    <!-- Reset Filters Button -->
+                    <button id="resetFilterBtn" onclick="resetAllFilters()" class="hidden flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-2xl transition-all">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Reset Filters</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Active Filter Badges Container -->
+            <div id="activeFiltersContainer" class="hidden flex flex-wrap items-center gap-2 px-2">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Active Filters:</span>
+                <!-- Badges dynamically injected -->
+            </div>
+
+            <!-- KPI Cards Overview -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <!-- Card 1: Total MoC (Styled like Card in Image) -->
+                <div class="bg-brand-900 text-white rounded-3xl p-5 shadow-soft relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-brand-800/40 rounded-full blur-2xl"></div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-brand-200">Total Requests</span>
+                        <div class="w-8 h-8 rounded-full bg-brand-800/60 flex items-center justify-center text-brand-200">
+                            <i class="fa-solid fa-layer-group text-sm"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-extrabold tracking-tight" id="kpiTotal">31</div>
+                        <div class="text-xs text-brand-200 mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-database"></i> All registered MOCs
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Completed MoC -->
+                <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Completed (Part 4)</span>
+                        <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                            <i class="fa-solid fa-circle-check text-sm"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-extrabold text-slate-900" id="kpiCompleted">0</div>
+                        <div class="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1" id="kpiCompletedPct">
+                            <i class="fa-solid fa-chart-line"></i> 0% success rate
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: In Progress MoC -->
+                <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">In Progress (Parts 1-3)</span>
+                        <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <i class="fa-solid fa-spinner text-sm"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-extrabold text-slate-900" id="kpiInProgress">0</div>
+                        <div class="text-xs text-amber-600 font-medium mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-clock"></i> Active workflow tasks
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Emergency MoC -->
+                <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Emergency Type</span>
+                        <div class="w-8 h-8 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center">
+                            <i class="fa-solid fa-bolt text-sm"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-extrabold text-slate-900" id="kpiEmergency">0</div>
+                        <div class="text-xs text-rose-500 font-medium mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-triangle-exclamation"></i> High priority action
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Charts Section (Grid Layout) -->
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                <!-- Chart 1: Category Distribution -->
+                <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-800">Category Breakdown</h2>
+                            <p class="text-xs text-slate-400">Plant vs Maintenance</p>
+                        </div>
+                        <span class="text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full font-medium">Click to filter</span>
+                    </div>
+                    <div class="chart-canvas-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Workflow Part Status -->
+                <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-800">Workflow Phase</h2>
+                            <p class="text-xs text-slate-400">MoC Stage distribution</p>
+                        </div>
+                        <span class="text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full font-medium">Click to filter</span>
+                    </div>
+                    <div class="chart-canvas-container">
+                        <canvas id="partChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Urgency Breakdown -->
+                <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-800">Urgency Level</h2>
+                            <p class="text-xs text-slate-400">Normal vs Emergency</p>
+                        </div>
+                        <span class="text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full font-medium">Click to filter</span>
+                    </div>
+                    <div class="chart-canvas-container">
+                        <canvas id="urgencyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 4: Top Initiators -->
+                <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-800">Top Initiators</h2>
+                            <p class="text-xs text-slate-400">Requests by owner</p>
+                        </div>
+                        <span class="text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full font-medium">Click to filter</span>
+                    </div>
+                    <div class="chart-canvas-container">
+                        <canvas id="initiatorChart"></canvas>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Detailed MoC Data Table -->
+            <section class="bg-white rounded-3xl shadow-card border border-slate-100 overflow-hidden flex flex-col mb-6">
+                <!-- Table Header Bar -->
+                <div class="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900">MoC Records</h2>
+                        <p class="text-xs text-slate-400">Real-time status updates and details</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span id="recordCounter" class="text-xs font-semibold bg-brand-50 text-brand-800 px-3 py-1.5 rounded-full border border-brand-200">
+                            Showing 31 of 31 records
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Table Content -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs md:text-sm">
+                        <thead>
+                            <tr class="bg-slate-50/80 text-slate-500 font-semibold border-b border-slate-100 uppercase tracking-wider text-[11px]">
+                                <th class="p-4 pl-6">MoC Number</th>
+                                <th class="p-4">Title & Description</th>
+                                <th class="p-4">Category</th>
+                                <th class="p-4">Urgency</th>
+                                <th class="p-4">Initiator</th>
+                                <th class="p-4">Workflow Part</th>
+                                <th class="p-4">Current Status</th>
+                                <th class="p-4 pr-6">Date Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mocTableBody" class="divide-y divide-slate-100">
+                            <!-- Rows rendered via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty State -->
+                <div id="noDataState" class="hidden p-12 text-center">
+                    <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3 text-xl">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <p class="text-base font-semibold text-slate-700">No matching MoC records found</p>
+                    <p class="text-xs text-slate-400 mt-1">Try resetting filters or adjusting search keyword</p>
+                    <button onclick="resetAllFilters()" class="mt-4 px-4 py-2 bg-brand-900 text-white rounded-xl text-xs font-semibold hover:bg-brand-800 transition-all">
+                        Reset Filters
+                    </button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Complete dataset from MoC.xlsx
+        const rawMocData = [
+            { id: "MOC-PTO-2026-0061", title: "งานปรับปริมาณน้ำมัน Clean Line Blending", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "CHAVALIT MATA", part: "Part 3", status: "Prepare procurement document or Link Path", date: "17/08/2026 13:24" },
+            { id: "MOC-PTO-2026-0062", title: "สลับผลิตภัณฑ์ในถัง TA01 (GSH91-E10) , TA07, TA08 (GSH95-E10)", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "SUPHASIT KOMONPAN", part: "Part 3", status: "Prepare procurement document or Link Path", date: "29/10/2026 13:12" },
+            { id: "MOC-PTO-2026-0063", title: "งานจ้างเหมาปรับปรุงระบบระงับเหตุฉุกเฉิน (ESD) และระบบป้องกันน้ำมันหกล้น (Overfill Tank Truck) ณ คลังปิโตรเลียมบางจาก", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "NORANOP NARUNORAGULSOPIT", part: "Part 2", status: "Review Risk, Mitigation by PSA technique selection", date: "22/10/2026 10:52" },
+            { id: "MOC-PTO-2026-0064", title: "งานปรับปรุงจุดระบบท่อสูบน้ำมัน JP-8 ผ่านถัง Quick Flush Tank เข้าถังใหญ่", category: "Plant Change", type: "Permanent", urgency: "Emergency", initiator: "ARTIT JUTIMA", part: "Part 4", status: "Completed", date: "01/11/2026 00:32" },
+            { id: "MOC-PTO-2026-0065", title: "งานปรับปรุงระบบไฟฟ้า 24Vdc ระบบไฟฟ้า UPS", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "WATCHARIN CHAISIN", part: "Part 4", status: "Completed", date: "11/09/2026 15:45" },
+            { id: "MOC-PTO-2026-0066", title: "งานแก้ไขจุด leak วาล์วระบบโฟม คลังปิโตรเลียมบางจาก", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "SAMRANRIT SULAMNAJ", part: "Part 1", status: "Cost Estimate & Conceptual Design & Prelim Risk", date: "02/09/2026 09:15" },
+            { id: "MOC-PTO-2026-0067", title: "ปรับเปลี่ยนตำแหน่ง Load cell เครื่องชั่งรถบรรทุกลำลูกกา", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "SUPAKORN DECHAKAMPOO", part: "Part 2", status: "Basic Design Review + identify Disciplines/Experts", date: "15/10/2026 14:20" },
+            { id: "MOC-PTO-2026-0068", title: "ติดตั้ง Pressure Gauge เพิ่มเติมบริเวณ Pump House", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "PORNTHEP SAJAI", part: "Part 3", status: "Kick off meeting Document or Link Path", date: "18/09/2026 11:30" },
+            { id: "MOC-PTO-2026-0069", title: "ปรับเปลี่ยนขนาดท่อจ่ายน้ำมันดีเซล B7", category: "Plant Change", type: "Permanent", urgency: "Emergency", initiator: "KITTIPONG RAVIVAN", part: "Part 4", status: "Division Manager of MoC Owner approves to implement", date: "05/10/2026 16:45" },
+            { id: "MOC-PTO-2026-0070", title: "เพิ่มระบบ Safety Interlock สำหรับ Tank Farm", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "WORAGORN WARATHORNTHNAKUL", part: "Part 1", status: "Division Manager of Initiator approves initiation", date: "28/08/2026 08:50" },
+            { id: "MOC-PTO-2026-0071", title: "ปรับปรุงระบบสายดิน ท่าเรือรับน้ำมัน", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "PIANGPATHOO THAISITTI", part: "Part 2", status: "Division Manager of Initiator acknowledge initiation", date: "14/10/2026 10:10" },
+            { id: "MOC-PTO-2026-0072", title: "ติดตั้ง Flow Meter สำหรับ Bio-Diesel", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "TIRACH SUSAMAKEE", part: "Part 3", status: "Progress Tracking Document or Link Path", date: "20/09/2026 15:00" },
+            { id: "MOC-PTO-2026-0073", title: "ปรับเปลี่ยนระบบวาล์วควบคุมแรงดัน", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "THANAKORN HINKAEW", part: "Part 1", status: "ระบุ Project No และรหัสงบประมาณ (I/O)", date: "11/10/2026 09:30" },
+            { id: "MOC-PTO-2026-0074", title: "ปรับปรุงระบบระบายอากาศห้องปั๊ม", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "CHANUTPOL PEWLONG", part: "Part 4", status: "Change Review Team approves to implement", date: "01/10/2026 14:05" },
+            { id: "MOC-PTO-2026-0075", title: "เพิ่มจุดเก็บตัวอย่างน้ำมัน", category: "Maintenance Change", type: "Permanent", urgency: "Emergency", initiator: "FIRST SRINUAN", part: "Part 4", status: "Section Manager/Shift Supervisor approves to start up", date: "29/09/2026 17:40" },
+            { id: "MOC-PTO-2026-0076", title: "ปรับปรุงระบบสัญญาณเตือนเพลิงไหม้", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "KITTIPAT YEETHOKHAO", part: "Part 4", status: "Completed", date: "12/10/2026 11:15" },
+            { id: "MOC-PTO-2026-0077", title: "ติดตั้งโซลาร์เซลล์บนหลังคาอาคารคลัง", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "BOONYAWEE JINASEN", part: "Part 3", status: "Prepare procurement document or Link Path", date: "25/10/2026 16:20" },
+            { id: "MOC-PTO-2026-0078", title: "เปลี่ยนปั๊มสูบจ่ายน้ำมันดีเซล หมายเลข 3", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "PASAWORN JATURACHAT", part: "Part 4", status: "Completed", date: "05/09/2026 13:50" },
+            { id: "MOC-PTO-2026-0079", title: "งานเพิ่มจุด Drainage วาล์วหน้าถัง", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "WONGSAKORN CHANAWAN", part: "Part 2", status: "Review Risk, Mitigation by PSA technique selection", date: "19/10/2026 10:05" },
+            { id: "MOC-PTO-2026-0080", title: "งานปรับปรุงท่อดับเพลิงบริเวณแนวรั้ว", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "CHAVALIT MATA", part: "Part 4", status: "Completed", date: "30/10/2026 09:00" },
+            { id: "MOC-PTO-2026-0081", title: "ติดตั้งกล้อง CCTV เพิ่มเติมบริเวณจุดจ่ายน้ำมัน", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "SUPHASIT KOMONPAN", part: "Part 3", status: "Kick off meeting Document or Link Path", date: "21/10/2026 14:30" },
+            { id: "MOC-PTO-2026-0082", title: "งานปรับปรุงระบบแสงสว่างคลังน้ำมัน", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "NORANOP NARUNORAGULSOPIT", part: "Part 4", status: "Completed", date: "15/09/2026 16:10" },
+            { id: "MOC-PTO-2026-0083", title: "งานติดตั้ง Temperature Sensor ถังเก็บ", category: "Plant Change", type: "Permanent", urgency: "Emergency", initiator: "ARTIT JUTIMA", part: "Part 2", status: "Basic Design Review + identify Disciplines/Experts", date: "08/10/2026 11:45" },
+            { id: "MOC-PTO-2026-0084", title: "งานเปลี่ยนปะเก็น Pipe Flange หน้าปั๊ม", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "WATCHARIN CHAISIN", part: "Part 4", status: "Completed", date: "04/10/2026 08:30" },
+            { id: "MOC-PTO-2026-0085", title: "ปรับปรุงโครงสร้างคลังจ่ายน้ำมัน truck loading", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "SAMRANRIT SULAMNAJ", part: "Part 3", status: "Prepare procurement document or Link Path", date: "27/10/2026 15:20" },
+            { id: "MOC-PTO-2026-0086", title: "เปลี่ยนวาล์วระบบน้ำดับเพลิง main header", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "SUPAKORN DECHAKAMPOO", part: "Part 1", status: "Cost Estimate & Conceptual Design & Prelim Risk", date: "19/09/2026 13:10" },
+            { id: "MOC-PTO-2026-0087", title: "ติดตั้ง Grounding Monitor Truck Loading", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "PORNTHEP SAJAI", part: "Part 4", status: "Completed", date: "02/10/2026 10:00" },
+            { id: "MOC-PTO-2026-0088", title: "ปรับปรุงระบบควบคุม Nitrogen Blanketing", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "KITTIPONG RAVIVAN", part: "Part 3", status: "Progress Tracking Document or Link Path", date: "16/10/2026 14:15" },
+            { id: "MOC-PTO-2026-0089", title: "งานเปลี่ยน Filter Water Separator", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "WORAGORN WARATHORNTHNAKUL", part: "Part 4", status: "Completed", date: "24/10/2026 11:00" },
+            { id: "MOC-PTO-2026-0090", title: "งานติดตั้ง Sampler Point ระบบท่อส่ง", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "PIANGPATHOO THAISITTI", part: "Part 2", status: "Review Risk, Mitigation by PSA technique selection", date: "28/10/2026 09:40" },
+            { id: "MOC-PTO-2026-0091", title: "ปรับปรุงระบบตรวจสอบก๊าซรั่วซึม", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "TIRACH SUSAMAKEE", part: "Part 4", status: "Completed", date: "01/11/2026 15:30" }
+        ];
+
+        // Filter state object
+        let activeFilters = {
+            category: null,
+            part: null,
+            urgency: null,
+            initiator: null,
+            search: ""
+        };
+
+        // Chart instances
+        let categoryChart, partChart, urgencyChart, initiatorChart;
+
+        // Quixotic Palette Theme
+        const colors = {
+            emerald900: '#064e3b',
+            emerald700: '#047857',
+            emerald500: '#10b981',
+            emerald200: '#a7f3d0',
+            emerald100: '#dcfce7',
+            slate400: '#94a3b8',
+            slate600: '#475569',
+            rose500: '#f43f5e',
+            rose100: '#ffe4e6',
+            amber500: '#f59e0b',
+            amber100: '#fef3c7'
+        };
+
+        window.onload = function() {
+            initCharts();
+            setupEventListeners();
+            updateDashboard();
+        };
+
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                activeFilters.search = e.target.value.trim().toLowerCase();
+                updateDashboard();
+            });
+        }
+
+        // Initialize All Chart.js Instances
+        function initCharts() {
+            // Chart 1: Category Doughnut
+            const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+            categoryChart = new Chart(ctxCategory, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [colors.emerald900, colors.emerald500],
+                        borderWidth: 0,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Plus Jakarta Sans', size: 11 }, boxWidth: 12 } }
+                    },
+                    onClick: (evt, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const label = categoryChart.data.labels[index];
+                            toggleFilter('category', label);
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Part Bar Chart
+            const ctxPart = document.getElementById('partChart').getContext('2d');
+            partChart = new Chart(ctxPart, {
+                type: 'bar',
+                data: {
+                    labels: ['Part 1', 'Part 2', 'Part 3', 'Part 4'],
+                    datasets: [{
+                        label: 'MoC Count',
+                        data: [],
+                        backgroundColor: [colors.emerald200, colors.emerald500, colors.emerald700, colors.emerald900],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { precision: 0 } },
+                        x: { grid: { display: false } }
+                    },
+                    onClick: (evt, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const label = partChart.data.labels[index];
+                            toggleFilter('part', label);
+                        }
+                    }
+                }
+            });
+
+            // Chart 3: Urgency Doughnut
+            const ctxUrgency = document.getElementById('urgencyChart').getContext('2d');
+            urgencyChart = new Chart(ctxUrgency, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Normal', 'Emergency'],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [colors.emerald700, colors.rose500],
+                        borderWidth: 0,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Plus Jakarta Sans', size: 11 }, boxWidth: 12 } }
+                    },
+                    onClick: (evt, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const label = urgencyChart.data.labels[index];
+                            toggleFilter('urgency', label);
+                        }
+                    }
+                }
+            });
+
+            // Chart 4: Top Initiators Horizontal Bar
+            const ctxInitiator = document.getElementById('initiatorChart').getContext('2d');
+            initiatorChart = new Chart(ctxInitiator, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'MoC Count',
+                        data: [],
+                        backgroundColor: colors.emerald700,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true, ticks: { precision: 0 } },
+                        y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                    },
+                    onClick: (evt, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const label = initiatorChart.data.labels[index];
+                            toggleFilter('initiator', label);
+                        }
+                    }
+                }
+            });
+        }
+
+        // Toggle Filter Logic
+        function toggleFilter(key, value) {
+            if (activeFilters[key] === value) {
+                activeFilters[key] = null;
+            } else {
+                activeFilters[key] = value;
+            }
+            updateDashboard();
+        }
+
+        // Reset All Active Filters
+        function resetAllFilters() {
+            activeFilters = { category: null, part: null, urgency: null, initiator: null, search: "" };
+            document.getElementById('searchInput').value = "";
+            updateDashboard();
+        }
+
+        // Main Update Loop (Applies Filters & Updates UI)
+        function updateDashboard() {
+            // 1. Filter Dataset based on active filters
+            const filteredData = rawMocData.filter(item => {
+                // Category Filter
+                if (activeFilters.category && item.category !== activeFilters.category) return false;
+                // Part Filter
+                if (activeFilters.part && item.part !== activeFilters.part) return false;
+                // Urgency Filter
+                if (activeFilters.urgency && item.urgency !== activeFilters.urgency) return false;
+                // Initiator Filter
+                if (activeFilters.initiator && item.initiator !== activeFilters.initiator) return false;
+                // Search Keyword Filter
+                if (activeFilters.search) {
+                    const searchStr = `${item.id} ${item.title} ${item.initiator} ${item.status}`.toLowerCase();
+                    if (!searchStr.includes(activeFilters.search)) return false;
+                }
+                return true;
+            });
+
+            // 2. Render KPI Summary Cards
+            const total = filteredData.length;
+            const completed = filteredData.filter(d => d.part === 'Part 4' && d.status === 'Completed').length;
+            const inProgress = filteredData.filter(d => d.part !== 'Part 4' || d.status !== 'Completed').length;
+            const emergency = filteredData.filter(d => d.urgency === 'Emergency').length;
+            const successRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('kpiTotal').innerText = total;
+            document.getElementById('kpiCompleted').innerText = completed;
+            document.getElementById('kpiInProgress').innerText = inProgress;
+            document.getElementById('kpiEmergency').innerText = emergency;
+            document.getElementById('kpiCompletedPct').innerHTML = `<i class="fa-solid fa-chart-line"></i> ${successRate}% completion rate`;
+
+            // 3. Render Active Filter Chips & Reset Button Visibility
+            renderFilterChips();
+
+            // 4. Update Charts with filtered data distributions
+            updateChartData(filteredData);
+
+            // 5. Render Data Table
+            renderTable(filteredData);
+        }
+
+        // Render Active Filter Badges
+        function renderFilterChips() {
+            const container = document.getElementById('activeFiltersContainer');
+            const resetBtn = document.getElementById('resetFilterBtn');
+            
+            let chipHtml = '<span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Active Filters:</span>';
+            let activeCount = 0;
+
+            for (const [key, val] of Object.entries(activeFilters)) {
+                if (val && key !== 'search') {
+                    activeCount++;
+                    chipHtml += `
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-brand-900 text-white shadow-sm">
+                            <span class="opacity-70 capitalize">${key}:</span> ${val}
+                            <button onclick="toggleFilter('${key}', '${val}')" class="hover:text-rose-300 ml-1">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </span>
+                    `;
+                }
+            }
+
+            if (activeFilters.search) {
+                activeCount++;
+                chipHtml += `
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-white shadow-sm">
+                        <span class="opacity-70">Search:</span> "${activeFilters.search}"
+                        <button onclick="resetSearch()" class="hover:text-rose-300 ml-1">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </span>
+                `;
+            }
+
+            if (activeCount > 0) {
+                container.innerHTML = chipHtml;
+                container.classList.remove('hidden');
+                resetBtn.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+                resetBtn.classList.add('hidden');
+            }
+        }
+
+        function resetSearch() {
+            activeFilters.search = "";
+            document.getElementById('searchInput').value = "";
+            updateDashboard();
+        }
+
+        // Dynamically recalculate distribution counts for Charts
+        function updateChartData(data) {
+            // Category Distribution
+            const catCounts = {};
+            data.forEach(d => catCounts[d.category] = (catCounts[d.category] || 0) + 1);
+            categoryChart.data.labels = Object.keys(catCounts);
+            categoryChart.data.datasets[0].data = Object.values(catCounts);
+            categoryChart.update();
+
+            // Part Distribution
+            const partCounts = { 'Part 1': 0, 'Part 2': 0, 'Part 3': 0, 'Part 4': 0 };
+            data.forEach(d => { if (partCounts[d.part] !== undefined) partCounts[d.part]++; });
+            partChart.data.datasets[0].data = Object.values(partCounts);
+            partChart.update();
+
+            // Urgency Distribution
+            const urgencyCounts = { 'Normal': 0, 'Emergency': 0 };
+            data.forEach(d => { if (urgencyCounts[d.urgency] !== undefined) urgencyCounts[d.urgency]++; });
+            urgencyChart.data.datasets[0].data = Object.values(urgencyCounts);
+            urgencyChart.update();
+
+            // Top Initiators (Top 5)
+            const initCounts = {};
+            data.forEach(d => initCounts[d.initiator] = (initCounts[d.initiator] || 0) + 1);
+            const sortedInitiators = Object.entries(initCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            
+            initiatorChart.data.labels = sortedInitiators.map(i => i[0].split(' ')[0]); // Display First Name
+            initiatorChart.data.datasets[0].data = sortedInitiators.map(i => i[1]);
+            initiatorChart.update();
+        }
+
+        // Render Data Table
+        function renderTable(data) {
+            const tbody = document.getElementById('mocTableBody');
+            const noData = document.getElementById('noDataState');
+            const counter = document.getElementById('recordCounter');
+
+            counter.innerText = `Showing ${data.length} of ${rawMocData.length} records`;
+
+            if (data.length === 0) {
+                tbody.innerHTML = '';
+                noData.classList.remove('hidden');
+                return;
+            }
+
+            noData.classList.add('hidden');
+
+            tbody.innerHTML = data.map(row => {
+                // Category Chip Styling
+                const isPlant = row.category === 'Plant Change';
+                const catBadge = isPlant 
+                    ? '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200"><i class="fa-solid fa-industry mr-1 text-[10px]"></i> Plant</span>'
+                    : '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200"><i class="fa-solid fa-wrench mr-1 text-[10px]"></i> Maintenance</span>';
+
+                // Urgency Chip Styling
+                const isEmergency = row.urgency === 'Emergency';
+                const urgencyBadge = isEmergency
+                    ? '<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200 animate-pulse"><i class="fa-solid fa-bolt mr-1"></i> Emergency</span>'
+                    : '<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-600 border border-slate-200">Normal</span>';
+
+                // Status Badge Styling
+                const isCompleted = row.status === 'Completed';
+                const statusBadge = isCompleted
+                    ? '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-100 text-brand-900"><i class="fa-solid fa-circle-check text-brand-600"></i> Completed</span>'
+                    : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200" title="${row.status}"><i class="fa-solid fa-clock text-amber-600"></i> ${row.status.length > 30 ? row.status.substring(0,28)+'...' : row.status}</span>`;
+
+                return `
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="p-4 pl-6 font-bold text-brand-900 whitespace-nowrap">
+                            ${row.id}
+                        </td>
+                        <td class="p-4 max-w-md">
+                            <div class="font-medium text-slate-900 leading-snug">${row.title}</div>
+                        </td>
+                        <td class="p-4 whitespace-nowrap">${catBadge}</td>
+                        <td class="p-4 whitespace-nowrap">${urgencyBadge}</td>
+                        <td class="p-4 font-medium text-slate-700 whitespace-nowrap">${row.initiator}</td>
+                        <td class="p-4 whitespace-nowrap">
+                            <span class="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded text-xs">${row.part}</span>
+                        </td>
+                        <td class="p-4 whitespace-nowrap">${statusBadge}</td>
+                        <td class="p-4 pr-6 text-slate-400 text-xs whitespace-nowrap">${row.date}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
