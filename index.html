@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoC Management Dashboard</title>
+    <title>MoC Management Dashboard - DealDeck Style</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -20,27 +20,26 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: {
+                        deal: {
                             50: '#f0fdf4',
                             100: '#dcfce7',
-                            200: '#bbf7d0',
                             500: '#10b981',
                             600: '#059669',
-                            700: '#047857',
                             800: '#065f46',
-                            900: '#064e3b',
-                            dark: '#032d23'
-                        },
-                        surface: '#F3F5F8',
-                        card: '#FFFFFF'
+                            900: '#0f172a', // Dark theme accents
+                            blue: '#3b82f6',
+                            blueDark: '#1e3a8a',
+                            card: '#ffffff',
+                            bg: '#f4f6f9'
+                        }
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'Prompt', 'sans-serif'],
                     },
                     boxShadow: {
-                        'soft': '0 10px 30px -5px rgba(6, 78, 59, 0.05)',
-                        'card': '0 4px 20px 0 rgba(0, 0, 0, 0.03)',
-                        'glow': '0 0 20px rgba(16, 185, 129, 0.2)'
+                        'deal': '0 4px 25px -2px rgba(0, 0, 0, 0.04)',
+                        'card': '0 2px 12px 0 rgba(0, 0, 0, 0.02)',
+                        'glow': '0 0 20px rgba(59, 130, 246, 0.2)'
                     }
                 }
             }
@@ -48,233 +47,339 @@
     </script>
     <style>
         body {
-            background-color: #F3F5F8;
+            background-color: #f4f6f9;
             font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif;
-            color: #1E293B;
+            color: #1e293b;
         }
-        .chart-canvas-container {
+        .chart-container {
             position: relative;
             width: 100%;
             height: 220px;
         }
-        /* Custom scrollbar for table */
+        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #F1F5F9;
+            background: #f1f5f9;
             border-radius: 8px;
         }
         ::-webkit-scrollbar-thumb {
-            background: #CBD5E1;
+            background: #cbd5e1;
             border-radius: 8px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94A3B8;
         }
     </style>
 </head>
 <body class="min-h-screen p-3 md:p-6 text-slate-800">
 
-    <div class="max-w-[1600px] mx-auto flex flex-col md:flex-row gap-6">
+    <div class="max-w-[1700px] mx-auto flex gap-6 relative">
 
-        <!-- Sidebar Navigation (Quixotic Style) -->
-        <aside class="w-full md:w-20 lg:w-24 bg-white rounded-3xl p-4 flex md:flex-col items-center justify-between shadow-card border border-slate-100 flex-shrink-0">
-            <div class="flex md:flex-col items-center gap-6 w-full">
-                <!-- Logo -->
-                <div class="flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-900 text-brand-500 text-xl font-bold">
-                    <i class="fa-solid fa-square-poll-vertical text-2xl"></i>
+        <!-- Mobile Sidebar Overlay -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 z-40 hidden md:hidden transition-opacity" onclick="toggleSidebar()"></div>
+
+        <!-- Sidebar Navigation (DealDeck Style) -->
+        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 w-64 bg-white rounded-r-3xl md:rounded-3xl p-6 flex flex-col justify-between shadow-card border border-slate-100 flex-shrink-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+            <div class="flex flex-col gap-6">
+                <!-- Logo & Brand -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-lg font-bold shadow-md shadow-blue-500/20">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                        <span class="text-lg font-bold text-slate-900 tracking-tight">DealDeck</span>
+                    </div>
+                    <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
                 </div>
 
-                <!-- Nav Icons -->
-                <nav class="flex md:flex-col items-center gap-3 w-full justify-center">
-                    <button class="w-12 h-12 rounded-2xl bg-brand-900 text-white flex items-center justify-center transition-all shadow-md">
-                        <i class="fa-solid fa-chart-pie text-lg"></i>
-                    </button>
-                    <button class="w-12 h-12 rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-brand-900 flex items-center justify-center transition-all">
-                        <i class="fa-solid fa-folder-open text-lg"></i>
-                    </button>
-                    <button class="w-12 h-12 rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-brand-900 flex items-center justify-center transition-all">
-                        <i class="fa-solid fa-sliders text-lg"></i>
-                    </button>
-                    <button class="w-12 h-12 rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-brand-900 flex items-center justify-center transition-all">
-                        <i class="fa-solid fa-users text-lg"></i>
-                    </button>
-                </nav>
+                <!-- Menu Group: MENU -->
+                <div class="space-y-1">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Menu</p>
+                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
+                        <i class="fa-solid fa-house text-slate-400 w-5"></i> Dashboard
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl bg-blue-600 text-white font-semibold text-sm shadow-md shadow-blue-500/20 transition-all">
+                        <i class="fa-solid fa-file-lines text-white w-5"></i> Report (MoC)
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
+                        <i class="fa-solid fa-box text-slate-400 w-5"></i> Products
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
+                        <i class="fa-solid fa-users text-slate-400 w-5"></i> Consumer
+                    </a>
+                </div>
+
+                <!-- Menu Group: FINANCIAL -->
+                <div class="space-y-1 pt-2">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Financial</p>
+                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
+                        <i class="fa-solid fa-wallet text-slate-400 w-5"></i> Transactions
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
+                        <i class="fa-solid fa-file-invoice-dollar text-slate-400 w-5"></i> Invoices
+                    </a>
+                </div>
+
+                <!-- Menu Group: TOOLS -->
+                <div class="space-y-1 pt-2">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Tools</p>
+                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
+                        <i class="fa-solid fa-gear text-slate-400 w-5"></i> Settings
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
+                        <i class="fa-solid fa-comment-dots text-slate-400 w-5"></i> Feedback
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
+                        <i class="fa-solid fa-circle-question text-slate-400 w-5"></i> Help
+                    </a>
+                </div>
             </div>
 
-            <!-- Profile Bottom -->
-            <div class="hidden md:flex flex-col items-center gap-4">
-                <button class="w-12 h-12 rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-brand-900 flex items-center justify-center transition-all">
-                    <i class="fa-solid fa-gear text-lg"></i>
-                </button>
-                <div class="w-10 h-10 rounded-full bg-brand-100 text-brand-900 font-bold flex items-center justify-center text-sm border-2 border-brand-500">
-                    AD
+            <!-- Bottom Upgrade Card -->
+            <div class="mt-8 bg-slate-900 rounded-3xl p-4 text-white relative overflow-hidden shadow-lg">
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-blue-500/20 rounded-full blur-xl"></div>
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-blue-400">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold">Upgrade Pro</h4>
+                        <p class="text-[10px] text-slate-400">Unlock advanced features</p>
+                    </div>
                 </div>
+                <button class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-xs transition-all shadow-md">
+                    Upgrade $30
+                </button>
             </div>
         </aside>
 
         <!-- Main Content Area -->
-        <main class="flex-1 flex flex-col gap-6 overflow-hidden">
+        <main class="flex-1 flex flex-col gap-6 overflow-hidden min-w-0">
 
-            <!-- Top Bar Header -->
-            <header class="bg-white rounded-3xl p-4 md:px-6 md:py-4 shadow-card border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <h1 class="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2">
-                        <span>Management of Change</span>
-                        <span class="text-xs bg-brand-100 text-brand-800 font-semibold px-2.5 py-1 rounded-full">MoC PTO</span>
-                    </h1>
+            <!-- Top Header -->
+            <header class="bg-white rounded-3xl p-4 md:px-8 md:py-5 shadow-card border border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="toggleSidebar()" class="md:hidden text-slate-600 hover:text-slate-900 text-lg mr-1">
+                                <i class="fa-solid fa-bars"></i>
+                            </button>
+                            <h1 class="text-xl md:text-2xl font-bold text-slate-900">Sales & MoC Report</h1>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5" id="currentDateDisplay">Monday, November 2, 2026</p>
+                    </div>
                 </div>
 
-                <!-- Global Search & Control -->
-                <div class="flex items-center gap-3 w-full md:w-auto">
+                <!-- Right Profile & Search Bar -->
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                     <!-- Search Input -->
-                    <div class="relative flex-1 md:w-80">
-                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="searchInput" placeholder="Search MoC No, Title, Owner..." 
-                            class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all">
+                    <div class="relative flex-1 sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="searchInput" placeholder="Search MoC No, Title..." 
+                            class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
                     </div>
 
-                    <!-- Reset Filters Button -->
-                    <button id="resetFilterBtn" onclick="resetAllFilters()" class="hidden flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-2xl transition-all">
-                        <i class="fa-solid fa-rotate-left"></i>
-                        <span>Reset Filters</span>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100">
+                            <i class="fa-regular fa-bell text-xs"></i>
+                        </button>
+                        <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+                            <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs border border-blue-200">
+                                FA
+                            </div>
+                            <div class="hidden lg:block text-left">
+                                <div class="text-xs font-bold text-slate-800 leading-tight">Ferra Alexandra</div>
+                                <div class="text-[10px] text-slate-400">Admin store</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </header>
 
-            <!-- Active Filter Badges Container -->
+            <!-- Active Filters Bar -->
             <div id="activeFiltersContainer" class="hidden flex flex-wrap items-center gap-2 px-2">
                 <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Active Filters:</span>
-                <!-- Badges dynamically injected -->
             </div>
 
-            <!-- KPI Cards Overview -->
+            <!-- Top KPI Cards Grid (Matching DealDeck style) -->
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 
-                <!-- Card 1: Total MoC (Styled like Card in Image) -->
-                <div class="bg-brand-900 text-white rounded-3xl p-5 shadow-soft relative overflow-hidden flex flex-col justify-between">
-                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-brand-800/40 rounded-full blur-2xl"></div>
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-brand-200">Total Requests</span>
-                        <div class="w-8 h-8 rounded-full bg-brand-800/60 flex items-center justify-center text-brand-200">
-                            <i class="fa-solid fa-layer-group text-sm"></i>
+                <!-- Card 1: Total MoC (Blue Theme Card) -->
+                <div class="bg-blue-600 text-white rounded-3xl p-5 shadow-lg shadow-blue-500/20 relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-9 h-9 rounded-2xl bg-white/20 flex items-center justify-center text-white text-sm">
+                            <i class="fa-solid fa-file-invoice"></i>
                         </div>
+                        <span class="text-[11px] font-bold bg-white/20 px-2.5 py-1 rounded-full text-white">+2.08%</span>
                     </div>
                     <div>
-                        <div class="text-3xl font-extrabold tracking-tight" id="kpiTotal">31</div>
-                        <div class="text-xs text-brand-200 mt-1 flex items-center gap-1">
-                            <i class="fa-solid fa-database"></i> All registered MOCs
-                        </div>
+                        <p class="text-xs font-medium text-blue-100 uppercase tracking-wider">Total Requests</p>
+                        <div class="text-3xl font-extrabold tracking-tight mt-1" id="kpiTotal">31</div>
+                        <p class="text-[11px] text-blue-100 mt-1">Products vs last month</p>
                     </div>
                 </div>
 
-                <!-- Card 2: Completed MoC -->
+                <!-- Card 2: Completed -->
                 <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Completed (Part 4)</span>
-                        <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                            <i class="fa-solid fa-circle-check text-sm"></i>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-9 h-9 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 text-sm">
+                            <i class="fa-solid fa-circle-check"></i>
                         </div>
+                        <span class="text-[11px] font-bold bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full" id="kpiCompletedPct">+12.4%</span>
                     </div>
                     <div>
-                        <div class="text-3xl font-extrabold text-slate-900" id="kpiCompleted">0</div>
-                        <div class="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1" id="kpiCompletedPct">
-                            <i class="fa-solid fa-chart-line"></i> 0% success rate
-                        </div>
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Completed (Part 4)</p>
+                        <div class="text-3xl font-extrabold text-slate-900 tracking-tight mt-1" id="kpiCompleted">0</div>
+                        <p class="text-[11px] text-slate-400 mt-1">Orders vs last month</p>
                     </div>
                 </div>
 
-                <!-- Card 3: In Progress MoC -->
+                <!-- Card 3: In Progress -->
                 <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">In Progress (Parts 1-3)</span>
-                        <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
-                            <i class="fa-solid fa-spinner text-sm"></i>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-9 h-9 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 text-sm">
+                            <i class="fa-solid fa-spinner"></i>
                         </div>
+                        <span class="text-[11px] font-bold bg-amber-50 text-amber-600 px-2.5 py-1 rounded-full">-2.08%</span>
                     </div>
                     <div>
-                        <div class="text-3xl font-extrabold text-slate-900" id="kpiInProgress">0</div>
-                        <div class="text-xs text-amber-600 font-medium mt-1 flex items-center gap-1">
-                            <i class="fa-solid fa-clock"></i> Active workflow tasks
-                        </div>
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">In Progress (Parts 1-3)</p>
+                        <div class="text-3xl font-extrabold text-slate-900 tracking-tight mt-1" id="kpiInProgress">0</div>
+                        <p class="text-[11px] text-slate-400 mt-1">Users vs last month</p>
                     </div>
                 </div>
 
-                <!-- Card 4: Emergency MoC -->
+                <!-- Card 4: Emergency -->
                 <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Emergency Type</span>
-                        <div class="w-8 h-8 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center">
-                            <i class="fa-solid fa-bolt text-sm"></i>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-9 h-9 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-600 text-sm">
+                            <i class="fa-solid fa-bolt"></i>
                         </div>
+                        <span class="text-[11px] font-bold bg-rose-50 text-rose-600 px-2.5 py-1 rounded-full">+12.1%</span>
                     </div>
                     <div>
-                        <div class="text-3xl font-extrabold text-slate-900" id="kpiEmergency">0</div>
-                        <div class="text-xs text-rose-500 font-medium mt-1 flex items-center gap-1">
-                            <i class="fa-solid fa-triangle-exclamation"></i> High priority action
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Emergency Type</p>
+                        <div class="text-3xl font-extrabold text-slate-900 tracking-tight mt-1" id="kpiEmergency">0</div>
+                        <p class="text-[11px] text-slate-400 mt-1">High priority actions</p>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Middle Section: Customer Habits Bar Chart & Product Statistics -->
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left 2 Cols: Customer Habits / Bar Chart -->
+                <div class="lg:col-span-2 bg-white rounded-3xl p-6 shadow-card border border-slate-100 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-900">MoC Monthly Trend</h2>
+                            <p class="text-xs text-slate-400">Track your customer habits & activity</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] bg-slate-100 text-slate-600 px-3 py-1.5 rounded-xl font-semibold flex items-center gap-1.5 cursor-pointer">
+                                This year <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="flex items-center gap-6 mb-4 text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-slate-300"></span>
+                            <span class="text-slate-600 font-medium">Seen product</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-blue-600"></span>
+                            <span class="text-slate-600 font-medium">Sales / MoCs</span>
+                        </div>
+                    </div>
+
+                    <div class="chart-container" style="height: 260px;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Right Col: Product Statistic (Circular progress style as in image) -->
+                <div class="bg-white rounded-3xl p-6 shadow-card border border-slate-100 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-900">Product Statistic</h2>
+                            <p class="text-xs text-slate-400">Track your product sales</p>
+                        </div>
+                        <span class="text-[11px] bg-slate-100 text-slate-600 px-3 py-1.5 rounded-xl font-semibold flex items-center gap-1.5 cursor-pointer">
+                            Today <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                        </span>
+                    </div>
+
+                    <div class="chart-container flex items-center justify-center" style="height: 180px;">
+                        <canvas id="urgencyChart"></canvas>
+                    </div>
+
+                    <!-- Breakdown List -->
+                    <div class="space-y-3 mt-4 pt-4 border-t border-slate-100">
+                        <div class="flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2 font-medium text-slate-700">
+                                <i class="fa-solid fa-industry text-blue-600 w-4"></i> Plant Change
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-bold text-slate-900" id="statPlantCount">0</span>
+                                <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">+1.8%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2 font-medium text-slate-700">
+                                <i class="fa-solid fa-wrench text-slate-400 w-4"></i> Maintenance
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-bold text-slate-900" id="statMaintCount">0</span>
+                                <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">+2.3%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2 font-medium text-slate-700">
+                                <i class="fa-solid fa-bolt text-rose-500 w-4"></i> Emergency
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-bold text-slate-900" id="statEmerCount">0</span>
+                                <span class="text-[10px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">-1.04%</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
             </section>
 
-            <!-- Charts Section (Grid Layout) -->
-            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-                <!-- Chart 1: Category Distribution -->
-                <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
+            <!-- Bottom Section: Workflow Breakdown & Initiators / Table -->
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Workflow Stage Chart -->
+                <div class="bg-white rounded-3xl p-6 shadow-card border border-slate-100 flex flex-col justify-between">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h2 class="text-sm font-bold text-slate-800">Category Breakdown</h2>
-                            <p class="text-xs text-slate-400">Plant vs Maintenance</p>
-                        </div>
-                        <span class="text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full font-medium">Click to filter</span>
-                    </div>
-                    <div class="chart-canvas-container">
-                        <canvas id="categoryChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Chart 2: Workflow Part Status -->
-                <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h2 class="text-sm font-bold text-slate-800">Workflow Phase</h2>
+                            <h2 class="text-base font-bold text-slate-900">Workflow Phase</h2>
                             <p class="text-xs text-slate-400">MoC Stage distribution</p>
                         </div>
-                        <span class="text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full font-medium">Click to filter</span>
+                        <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-lg font-medium">Click to filter</span>
                     </div>
-                    <div class="chart-canvas-container">
+                    <div class="chart-container" style="height: 220px;">
                         <canvas id="partChart"></canvas>
                     </div>
                 </div>
 
-                <!-- Chart 3: Urgency Breakdown -->
-                <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
+                <!-- Top Initiators Bar Chart -->
+                <div class="lg:col-span-2 bg-white rounded-3xl p-6 shadow-card border border-slate-100 flex flex-col justify-between">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h2 class="text-sm font-bold text-slate-800">Urgency Level</h2>
-                            <p class="text-xs text-slate-400">Normal vs Emergency</p>
-                        </div>
-                        <span class="text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full font-medium">Click to filter</span>
-                    </div>
-                    <div class="chart-canvas-container">
-                        <canvas id="urgencyChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Chart 4: Top Initiators -->
-                <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h2 class="text-sm font-bold text-slate-800">Top Initiators</h2>
+                            <h2 class="text-base font-bold text-slate-900">Top Initiators</h2>
                             <p class="text-xs text-slate-400">Requests by owner</p>
                         </div>
-                        <span class="text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full font-medium">Click to filter</span>
+                        <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-lg font-medium">Click to filter</span>
                     </div>
-                    <div class="chart-canvas-container">
+                    <div class="chart-container" style="height: 220px;">
                         <canvas id="initiatorChart"></canvas>
                     </div>
                 </div>
@@ -283,24 +388,26 @@
 
             <!-- Detailed MoC Data Table -->
             <section class="bg-white rounded-3xl shadow-card border border-slate-100 overflow-hidden flex flex-col mb-6">
-                <!-- Table Header Bar -->
-                <div class="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
+                <div class="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <h2 class="text-base font-bold text-slate-900">MoC Records</h2>
                         <p class="text-xs text-slate-400">Real-time status updates and details</p>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span id="recordCounter" class="text-xs font-semibold bg-brand-50 text-brand-800 px-3 py-1.5 rounded-full border border-brand-200">
+                        <span id="recordCounter" class="text-xs font-semibold bg-blue-50 text-blue-700 px-3.5 py-1.5 rounded-full border border-blue-200">
                             Showing 31 of 31 records
                         </span>
+                        <button id="resetFilterBtn" onclick="resetAllFilters()" class="hidden px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-full transition-all">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> Reset Filters
+                        </button>
                     </div>
                 </div>
 
-                <!-- Table Content -->
+                <!-- Table Content with Horizontal Scroll for Mobile -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-xs md:text-sm">
                         <thead>
-                            <tr class="bg-slate-50/80 text-slate-500 font-semibold border-b border-slate-100 uppercase tracking-wider text-[11px]">
+                            <tr class="bg-slate-50 text-slate-400 font-semibold border-b border-slate-100 uppercase tracking-wider text-[11px]">
                                 <th class="p-4 pl-6">MoC Number</th>
                                 <th class="p-4">Title & Description</th>
                                 <th class="p-4">Category</th>
@@ -312,7 +419,6 @@
                             </tr>
                         </thead>
                         <tbody id="mocTableBody" class="divide-y divide-slate-100">
-                            <!-- Rows rendered via JavaScript -->
                         </tbody>
                     </table>
                 </div>
@@ -324,7 +430,7 @@
                     </div>
                     <p class="text-base font-semibold text-slate-700">No matching MoC records found</p>
                     <p class="text-xs text-slate-400 mt-1">Try resetting filters or adjusting search keyword</p>
-                    <button onclick="resetAllFilters()" class="mt-4 px-4 py-2 bg-brand-900 text-white rounded-xl text-xs font-semibold hover:bg-brand-800 transition-all">
+                    <button onclick="resetAllFilters()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-500 transition-all">
                         Reset Filters
                     </button>
                 </div>
@@ -335,7 +441,6 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // Complete dataset from MoC.xlsx
         const rawMocData = [
             { id: "MOC-PTO-2026-0061", title: "งานปรับปริมาณน้ำมัน Clean Line Blending", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "CHAVALIT MATA", part: "Part 3", status: "Prepare procurement document or Link Path", date: "17/08/2026 13:24" },
             { id: "MOC-PTO-2026-0062", title: "สลับผลิตภัณฑ์ในถัง TA01 (GSH91-E10) , TA07, TA08 (GSH95-E10)", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "SUPHASIT KOMONPAN", part: "Part 3", status: "Prepare procurement document or Link Path", date: "29/10/2026 13:12" },
@@ -370,38 +475,21 @@
             { id: "MOC-PTO-2026-0091", title: "ปรับปรุงระบบตรวจสอบก๊าซรั่วซึม", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "TIRACH SUSAMAKEE", part: "Part 4", status: "Completed", date: "01/11/2026 15:30" }
         ];
 
-        // Filter state object
-        let activeFilters = {
-            category: null,
-            part: null,
-            urgency: null,
-            initiator: null,
-            search: ""
-        };
-
-        // Chart instances
+        let activeFilters = { category: null, part: null, urgency: null, initiator: null, search: "" };
         let categoryChart, partChart, urgencyChart, initiatorChart;
-
-        // Quixotic Palette Theme
-        const colors = {
-            emerald900: '#064e3b',
-            emerald700: '#047857',
-            emerald500: '#10b981',
-            emerald200: '#a7f3d0',
-            emerald100: '#dcfce7',
-            slate400: '#94a3b8',
-            slate600: '#475569',
-            rose500: '#f43f5e',
-            rose100: '#ffe4e6',
-            amber500: '#f59e0b',
-            amber100: '#fef3c7'
-        };
 
         window.onload = function() {
             initCharts();
             setupEventListeners();
             updateDashboard();
         };
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
 
         function setupEventListeners() {
             document.getElementById('searchInput').addEventListener('input', (e) => {
@@ -410,160 +498,133 @@
             });
         }
 
-        // Initialize All Chart.js Instances
         function initCharts() {
-            // Chart 1: Category Doughnut
+            // Category Bar/Line trend Chart
             const ctxCategory = document.getElementById('categoryChart').getContext('2d');
             categoryChart = new Chart(ctxCategory, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'Plant Change',
+                            data: [3, 5, 2, 6, 4, 3, 5, 4, 3, 5, 2, 1],
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Maintenance',
+                            data: [2, 3, 4, 2, 3, 5, 2, 3, 4, 2, 3, 2],
+                            backgroundColor: '#cbd5e1',
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { precision: 0 } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Urgency Doughnut (Product Statistic circular rings style)
+            const ctxUrgency = document.getElementById('urgencyChart').getContext('2d');
+            urgencyChart = new Chart(ctxUrgency, {
                 type: 'doughnut',
                 data: {
-                    labels: [],
+                    labels: ['Plant Change', 'Maintenance', 'Emergency'],
                     datasets: [{
-                        data: [],
-                        backgroundColor: [colors.emerald900, colors.emerald500],
+                        data: [20, 8, 3],
+                        backgroundColor: ['#3b82f6', '#94a3b8', '#f43f5e'],
                         borderWidth: 0,
-                        hoverOffset: 6
+                        hoverOffset: 4
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { font: { family: 'Plus Jakarta Sans', size: 11 }, boxWidth: 12 } }
-                    },
+                    responsive: true, maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: { legend: { display: false } },
                     onClick: (evt, elements) => {
                         if (elements.length > 0) {
                             const index = elements[0].index;
-                            const label = categoryChart.data.labels[index];
-                            toggleFilter('category', label);
+                            const labels = ['Plant Change', 'Maintenance Change', 'Emergency'];
+                            if (index < 2) toggleFilter('category', labels[index]);
+                            else toggleFilter('urgency', 'Emergency');
                         }
                     }
                 }
             });
 
-            // Chart 2: Part Bar Chart
+            // Part Workflow Bar Chart
             const ctxPart = document.getElementById('partChart').getContext('2d');
             partChart = new Chart(ctxPart, {
                 type: 'bar',
                 data: {
                     labels: ['Part 1', 'Part 2', 'Part 3', 'Part 4'],
                     datasets: [{
-                        label: 'MoC Count',
-                        data: [],
-                        backgroundColor: [colors.emerald200, colors.emerald500, colors.emerald700, colors.emerald900],
+                        label: 'Count',
+                        data: [0, 0, 0, 0],
+                        backgroundColor: ['#93c5fd', '#60a5fa', '#2563eb', '#1e40af'],
                         borderRadius: 8
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { beginAtZero: true, ticks: { precision: 0 } },
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { precision: 0 } },
                         x: { grid: { display: false } }
                     },
                     onClick: (evt, elements) => {
                         if (elements.length > 0) {
-                            const index = elements[0].index;
-                            const label = partChart.data.labels[index];
-                            toggleFilter('part', label);
+                            toggleFilter('part', partChart.data.labels[elements[0].index]);
                         }
                     }
                 }
             });
 
-            // Chart 3: Urgency Doughnut
-            const ctxUrgency = document.getElementById('urgencyChart').getContext('2d');
-            urgencyChart = new Chart(ctxUrgency, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Normal', 'Emergency'],
-                    datasets: [{
-                        data: [],
-                        backgroundColor: [colors.emerald700, colors.rose500],
-                        borderWidth: 0,
-                        hoverOffset: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { font: { family: 'Plus Jakarta Sans', size: 11 }, boxWidth: 12 } }
-                    },
-                    onClick: (evt, elements) => {
-                        if (elements.length > 0) {
-                            const index = elements[0].index;
-                            const label = urgencyChart.data.labels[index];
-                            toggleFilter('urgency', label);
-                        }
-                    }
-                }
-            });
-
-            // Chart 4: Top Initiators Horizontal Bar
+            // Top Initiators Horizontal Bar Chart
             const ctxInitiator = document.getElementById('initiatorChart').getContext('2d');
             initiatorChart = new Chart(ctxInitiator, {
                 type: 'bar',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'MoC Count',
-                        data: [],
-                        backgroundColor: colors.emerald700,
-                        borderRadius: 6
-                    }]
-                },
+                data: { labels: [], datasets: [{ data: [], backgroundColor: '#3b82f6', borderRadius: 6 }] },
                 options: {
                     indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { beginAtZero: true, ticks: { precision: 0 } },
+                        x: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { precision: 0 } },
                         y: { grid: { display: false }, ticks: { font: { size: 10 } } }
                     },
                     onClick: (evt, elements) => {
                         if (elements.length > 0) {
-                            const index = elements[0].index;
-                            const label = initiatorChart.data.labels[index];
-                            toggleFilter('initiator', label);
+                            toggleFilter('initiator', initiatorChart.data.labels[elements[0].index]);
                         }
                     }
                 }
             });
         }
 
-        // Toggle Filter Logic
         function toggleFilter(key, value) {
-            if (activeFilters[key] === value) {
-                activeFilters[key] = null;
-            } else {
-                activeFilters[key] = value;
-            }
+            activeFilters[key] = (activeFilters[key] === value) ? null : value;
             updateDashboard();
         }
 
-        // Reset All Active Filters
         function resetAllFilters() {
             activeFilters = { category: null, part: null, urgency: null, initiator: null, search: "" };
             document.getElementById('searchInput').value = "";
             updateDashboard();
         }
 
-        // Main Update Loop (Applies Filters & Updates UI)
         function updateDashboard() {
-            // 1. Filter Dataset based on active filters
             const filteredData = rawMocData.filter(item => {
-                // Category Filter
                 if (activeFilters.category && item.category !== activeFilters.category) return false;
-                // Part Filter
                 if (activeFilters.part && item.part !== activeFilters.part) return false;
-                // Urgency Filter
                 if (activeFilters.urgency && item.urgency !== activeFilters.urgency) return false;
-                // Initiator Filter
-                if (activeFilters.initiator && item.initiator !== activeFilters.initiator) return false;
-                // Search Keyword Filter
+                if (activeFilters.initiator && !item.initiator.includes(activeFilters.initiator)) return false;
                 if (activeFilters.search) {
                     const searchStr = `${item.id} ${item.title} ${item.initiator} ${item.status}`.toLowerCase();
                     if (!searchStr.includes(activeFilters.search)) return false;
@@ -571,34 +632,31 @@
                 return true;
             });
 
-            // 2. Render KPI Summary Cards
             const total = filteredData.length;
             const completed = filteredData.filter(d => d.part === 'Part 4' && d.status === 'Completed').length;
             const inProgress = filteredData.filter(d => d.part !== 'Part 4' || d.status !== 'Completed').length;
             const emergency = filteredData.filter(d => d.urgency === 'Emergency').length;
-            const successRate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
             document.getElementById('kpiTotal').innerText = total;
             document.getElementById('kpiCompleted').innerText = completed;
             document.getElementById('kpiInProgress').innerText = inProgress;
             document.getElementById('kpiEmergency').innerText = emergency;
-            document.getElementById('kpiCompletedPct').innerHTML = `<i class="fa-solid fa-chart-line"></i> ${successRate}% completion rate`;
 
-            // 3. Render Active Filter Chips & Reset Button Visibility
+            // Update stats sidebar list
+            const plantCnt = filteredData.filter(d => d.category === 'Plant Change').length;
+            const maintCnt = filteredData.filter(d => d.category === 'Maintenance Change').length;
+            document.getElementById('statPlantCount').innerText = plantCnt;
+            document.getElementById('statMaintCount').innerText = maintCnt;
+            document.getElementById('statEmerCount').innerText = emergency;
+
             renderFilterChips();
-
-            // 4. Update Charts with filtered data distributions
             updateChartData(filteredData);
-
-            // 5. Render Data Table
             renderTable(filteredData);
         }
 
-        // Render Active Filter Badges
         function renderFilterChips() {
             const container = document.getElementById('activeFiltersContainer');
             const resetBtn = document.getElementById('resetFilterBtn');
-            
             let chipHtml = '<span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Active Filters:</span>';
             let activeCount = 0;
 
@@ -606,11 +664,9 @@
                 if (val && key !== 'search') {
                     activeCount++;
                     chipHtml += `
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-brand-900 text-white shadow-sm">
-                            <span class="opacity-70 capitalize">${key}:</span> ${val}
-                            <button onclick="toggleFilter('${key}', '${val}')" class="hover:text-rose-300 ml-1">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-600 text-white shadow-sm">
+                            <span class="opacity-75 capitalize">${key}:</span> ${val}
+                            <button onclick="toggleFilter('${key}', '${val}')" class="hover:text-rose-200 ml-1"><i class="fa-solid fa-xmark"></i></button>
                         </span>
                     `;
                 }
@@ -620,10 +676,8 @@
                 activeCount++;
                 chipHtml += `
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-white shadow-sm">
-                        <span class="opacity-70">Search:</span> "${activeFilters.search}"
-                        <button onclick="resetSearch()" class="hover:text-rose-300 ml-1">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
+                        <span class="opacity-75">Search:</span> "${activeFilters.search}"
+                        <button onclick="resetSearch()" class="hover:text-rose-200 ml-1"><i class="fa-solid fa-xmark"></i></button>
                     </span>
                 `;
             }
@@ -644,38 +698,29 @@
             updateDashboard();
         }
 
-        // Dynamically recalculate distribution counts for Charts
         function updateChartData(data) {
-            // Category Distribution
-            const catCounts = {};
-            data.forEach(d => catCounts[d.category] = (catCounts[d.category] || 0) + 1);
-            categoryChart.data.labels = Object.keys(catCounts);
-            categoryChart.data.datasets[0].data = Object.values(catCounts);
-            categoryChart.update();
-
             // Part Distribution
             const partCounts = { 'Part 1': 0, 'Part 2': 0, 'Part 3': 0, 'Part 4': 0 };
             data.forEach(d => { if (partCounts[d.part] !== undefined) partCounts[d.part]++; });
             partChart.data.datasets[0].data = Object.values(partCounts);
             partChart.update();
 
-            // Urgency Distribution
-            const urgencyCounts = { 'Normal': 0, 'Emergency': 0 };
-            data.forEach(d => { if (urgencyCounts[d.urgency] !== undefined) urgencyCounts[d.urgency]++; });
-            urgencyChart.data.datasets[0].data = Object.values(urgencyCounts);
+            // Urgency/Category Doughnut
+            const plantCnt = data.filter(d => d.category === 'Plant Change').length;
+            const maintCnt = data.filter(d => d.category === 'Maintenance Change').length;
+            const emerCnt = data.filter(d => d.urgency === 'Emergency').length;
+            urgencyChart.data.datasets[0].data = [plantCnt, maintCnt, emerCnt];
             urgencyChart.update();
 
-            // Top Initiators (Top 5)
+            // Top Initiators
             const initCounts = {};
             data.forEach(d => initCounts[d.initiator] = (initCounts[d.initiator] || 0) + 1);
             const sortedInitiators = Object.entries(initCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
-            
-            initiatorChart.data.labels = sortedInitiators.map(i => i[0].split(' ')[0]); // Display First Name
+            initiatorChart.data.labels = sortedInitiators.map(i => i[0].split(' ')[0]);
             initiatorChart.data.datasets[0].data = sortedInitiators.map(i => i[1]);
             initiatorChart.update();
         }
 
-        // Render Data Table
         function renderTable(data) {
             const tbody = document.getElementById('mocTableBody');
             const noData = document.getElementById('noDataState');
@@ -692,38 +737,29 @@
             noData.classList.add('hidden');
 
             tbody.innerHTML = data.map(row => {
-                // Category Chip Styling
                 const isPlant = row.category === 'Plant Change';
                 const catBadge = isPlant 
-                    ? '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200"><i class="fa-solid fa-industry mr-1 text-[10px]"></i> Plant</span>'
+                    ? '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200"><i class="fa-solid fa-industry mr-1 text-[10px]"></i> Plant</span>'
                     : '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200"><i class="fa-solid fa-wrench mr-1 text-[10px]"></i> Maintenance</span>';
 
-                // Urgency Chip Styling
                 const isEmergency = row.urgency === 'Emergency';
                 const urgencyBadge = isEmergency
-                    ? '<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200 animate-pulse"><i class="fa-solid fa-bolt mr-1"></i> Emergency</span>'
+                    ? '<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200"><i class="fa-solid fa-bolt mr-1"></i> Emergency</span>'
                     : '<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-600 border border-slate-200">Normal</span>';
 
-                // Status Badge Styling
                 const isCompleted = row.status === 'Completed';
                 const statusBadge = isCompleted
-                    ? '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-100 text-brand-900"><i class="fa-solid fa-circle-check text-brand-600"></i> Completed</span>'
-                    : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200" title="${row.status}"><i class="fa-solid fa-clock text-amber-600"></i> ${row.status.length > 30 ? row.status.substring(0,28)+'...' : row.status}</span>`;
+                    ? '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-circle-check text-emerald-600"></i> Completed</span>'
+                    : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200" title="${row.status}"><i class="fa-solid fa-clock text-amber-600"></i> ${row.status.length > 25 ? row.status.substring(0,23)+'...' : row.status}</span>`;
 
                 return `
                     <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="p-4 pl-6 font-bold text-brand-900 whitespace-nowrap">
-                            ${row.id}
-                        </td>
-                        <td class="p-4 max-w-md">
-                            <div class="font-medium text-slate-900 leading-snug">${row.title}</div>
-                        </td>
+                        <td class="p-4 pl-6 font-bold text-slate-900 whitespace-nowrap">${row.id}</td>
+                        <td class="p-4 max-w-md"><div class="font-medium text-slate-900 leading-snug">${row.title}</div></td>
                         <td class="p-4 whitespace-nowrap">${catBadge}</td>
                         <td class="p-4 whitespace-nowrap">${urgencyBadge}</td>
                         <td class="p-4 font-medium text-slate-700 whitespace-nowrap">${row.initiator}</td>
-                        <td class="p-4 whitespace-nowrap">
-                            <span class="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded text-xs">${row.part}</span>
-                        </td>
+                        <td class="p-4 whitespace-nowrap"><span class="font-bold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg text-xs">${row.part}</span></td>
                         <td class="p-4 whitespace-nowrap">${statusBadge}</td>
                         <td class="p-4 pr-6 text-slate-400 text-xs whitespace-nowrap">${row.date}</td>
                     </tr>
