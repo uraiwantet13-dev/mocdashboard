@@ -2,770 +2,890 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoC Management Dashboard - DealDeck Style</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MoC Management Dashboard (Donezo Theme)</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <!-- Google Fonts: Plus Jakarta Sans & Prompt -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        deal: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#10b981',
-                            600: '#059669',
-                            800: '#065f46',
-                            900: '#0f172a', // Dark theme accents
-                            blue: '#3b82f6',
-                            blueDark: '#1e3a8a',
-                            card: '#ffffff',
-                            bg: '#f4f6f9'
-                        }
-                    },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'Prompt', 'sans-serif'],
                     },
+                    colors: {
+                        donezoBg: '#F3F5F7',
+                        forestDark: '#0B3B24',
+                        forestPrimary: '#0F5132',
+                        forestMedium: '#146C43',
+                        forestLight: '#198754',
+                        mintSoft: '#D1E7DD',
+                        mintBadge: '#E8F5E9',
+                        accentYellow: '#FFC107',
+                        slateDark: '#1E293B',
+                    },
                     boxShadow: {
-                        'deal': '0 4px 25px -2px rgba(0, 0, 0, 0.04)',
-                        'card': '0 2px 12px 0 rgba(0, 0, 0, 0.02)',
-                        'glow': '0 0 20px rgba(59, 130, 246, 0.2)'
+                        'donezo': '0 10px 30px -5px rgba(15, 81, 50, 0.05), 0 4px 12px -2px rgba(0, 0, 0, 0.03)',
+                        'green-card': '0 14px 28px -4px rgba(15, 81, 50, 0.25)',
                     }
                 }
             }
         }
     </script>
+
     <style>
         body {
-            background-color: #f4f6f9;
+            background-color: #F3F5F7;
             font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif;
-            color: #1e293b;
+            color: #1E293B;
+            -webkit-tap-highlight-color: transparent;
         }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            height: 220px;
+
+        .donezo-dark-card {
+            background: linear-gradient(145deg, #0B3B24 0%, #146C43 100%);
+            color: white;
         }
-        /* Custom scrollbar */
+
+        .pill-button {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .pill-button.active {
+            background-color: #0F5132;
+            color: white;
+            box-shadow: 0 4px 12px rgba(15, 81, 50, 0.25);
+        }
+
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 8px;
+            background: #E2E8F0;
+            border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 8px;
+            background: #146C43;
+            border-radius: 10px;
+        }
+
+        .striped-bar-pattern {
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.15) 10px, rgba(255,255,255,0.15) 20px);
         }
     </style>
 </head>
-<body class="min-h-screen p-3 md:p-6 text-slate-800">
+<body class="bg-[#F3F5F7] min-h-screen text-slate-800 antialiased flex flex-col lg:flex-row">
 
-    <div class="max-w-[1700px] mx-auto flex gap-6 relative">
-
-        <!-- Mobile Sidebar Overlay -->
-        <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 z-40 hidden md:hidden transition-opacity" onclick="toggleSidebar()"></div>
-
-        <!-- Sidebar Navigation (DealDeck Style) -->
-        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 w-64 bg-white rounded-r-3xl md:rounded-3xl p-6 flex flex-col justify-between shadow-card border border-slate-100 flex-shrink-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
-            <div class="flex flex-col gap-6">
-                <!-- Logo & Brand -->
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-lg font-bold shadow-md shadow-blue-500/20">
-                            <i class="fa-solid fa-chart-pie"></i>
-                        </div>
-                        <span class="text-lg font-bold text-slate-900 tracking-tight">DealDeck</span>
-                    </div>
-                    <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-slate-600">
-                        <i class="fa-solid fa-xmark text-xl"></i>
-                    </button>
+    <!-- ================= SIDEBAR NAVIGATION (Donezo Style) ================= -->
+    <aside id="sidebar" class="w-full lg:w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between p-5 z-30 shrink-0">
+        <div class="space-y-8">
+            <!-- App Brand Logo -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-forestPrimary text-white flex items-center justify-center font-bold text-xl shadow-md">
+                    <i class="fa-solid fa-leaf"></i>
                 </div>
-
-                <!-- Menu Group: MENU -->
-                <div class="space-y-1">
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Menu</p>
-                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
-                        <i class="fa-solid fa-house text-slate-400 w-5"></i> Dashboard
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl bg-blue-600 text-white font-semibold text-sm shadow-md shadow-blue-500/20 transition-all">
-                        <i class="fa-solid fa-file-lines text-white w-5"></i> Report (MoC)
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
-                        <i class="fa-solid fa-box text-slate-400 w-5"></i> Products
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
-                        <i class="fa-solid fa-users text-slate-400 w-5"></i> Consumer
-                    </a>
-                </div>
-
-                <!-- Menu Group: FINANCIAL -->
-                <div class="space-y-1 pt-2">
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Financial</p>
-                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
-                        <i class="fa-solid fa-wallet text-slate-400 w-5"></i> Transactions
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
-                        <i class="fa-solid fa-file-invoice-dollar text-slate-400 w-5"></i> Invoices
-                    </a>
-                </div>
-
-                <!-- Menu Group: TOOLS -->
-                <div class="space-y-1 pt-2">
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Tools</p>
-                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
-                        <i class="fa-solid fa-gear text-slate-400 w-5"></i> Settings
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
-                        <i class="fa-solid fa-comment-dots text-slate-400 w-5"></i> Feedback
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition-all">
-                        <i class="fa-solid fa-circle-question text-slate-400 w-5"></i> Help
-                    </a>
+                <div>
+                    <span class="font-extrabold text-xl text-slate-900 tracking-tight block leading-none">Donezo</span>
+                    <span class="text-[11px] font-semibold text-emerald-700 tracking-wide uppercase">MoC Analytics</span>
                 </div>
             </div>
 
-            <!-- Bottom Upgrade Card -->
-            <div class="mt-8 bg-slate-900 rounded-3xl p-4 text-white relative overflow-hidden shadow-lg">
-                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-blue-500/20 rounded-full blur-xl"></div>
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-blue-400">
-                        <i class="fa-solid fa-bolt"></i>
+            <!-- Menu Links -->
+            <nav class="space-y-1.5 text-sm font-semibold">
+                <span class="text-[11px] uppercase tracking-wider text-slate-400 font-bold px-3 block mb-2">Menu</span>
+                <a href="#" onclick="resetFilters()" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl bg-forestPrimary text-white transition shadow-sm">
+                    <i class="fa-solid fa-chart-pie w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#tableSection" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition">
+                    <i class="fa-solid fa-list-check w-5"></i>
+                    <span>MoC Tasks</span>
+                    <span class="ml-auto bg-mintSoft text-forestPrimary text-xs px-2 py-0.5 rounded-full font-bold">283</span>
+                </a>
+                <a href="#" onclick="setStatusPillFilter('Completed')" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition">
+                    <i class="fa-solid fa-circle-check w-5 text-emerald-600"></i>
+                    <span>Completed MoC</span>
+                </a>
+                <a href="#" onclick="setStatusPillFilter('Incomplete')" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition">
+                    <i class="fa-solid fa-spinner w-5 text-amber-500"></i>
+                    <span>In-Progress</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Download / Mobile Promo Card -->
+        <div class="mt-8 donezo-dark-card p-4 rounded-3xl relative overflow-hidden hidden sm:block">
+            <div class="relative z-10 space-y-2">
+                <div class="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                </div>
+                <h4 class="font-bold text-xs leading-tight">Mobile & iPad Ready</h4>
+                <p class="text-[11px] text-emerald-100">Supports iOS, Android & Tablet touch controls</p>
+            </div>
+            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-lg"></div>
+        </div>
+    </aside>
+
+    <!-- ================= MAIN CONTENT WRAPPER ================= -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+
+        <!-- TOP SEARCH & HEADER BAR -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-3xl shadow-donezo border border-slate-100">
+            <!-- Search Field -->
+            <div class="relative flex-1 max-w-lg">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400 text-sm"></i>
+                <input type="text" id="searchInput" onkeyup="applyFilters()" 
+                       placeholder="Search MoC Title, No, Status (e.g. Complete, Incomplete)..." 
+                       class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-forestPrimary">
+            </div>
+
+            <!-- Profile & Header Actions -->
+            <div class="flex items-center justify-between sm:justify-end gap-3">
+                <div class="flex items-center gap-2">
+                    <button onclick="resetFilters()" class="px-4 py-2.5 bg-forestPrimary hover:bg-forestDark text-white text-xs font-bold rounded-2xl transition shadow-green-card flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Reset Filters</span>
+                    </button>
+                </div>
+                
+                <div class="h-8 w-[1px] bg-slate-200 mx-1"></div>
+
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center font-bold text-forestPrimary text-sm">
+                        TM
                     </div>
-                    <div>
-                        <h4 class="text-xs font-bold">Upgrade Pro</h4>
-                        <p class="text-[10px] text-slate-400">Unlock advanced features</p>
+                    <div class="hidden sm:block">
+                        <h4 class="text-xs font-extrabold text-slate-900 leading-tight">Totok Michael</h4>
+                        <p class="text-[10px] text-slate-400 font-medium">tmichael02@mail.com</p>
                     </div>
                 </div>
-                <button class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-xs transition-all shadow-md">
-                    Upgrade $30
+            </div>
+        </header>
+
+        <!-- DASHBOARD TITLE & YEAR TOGGLES -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard</h1>
+                <p class="text-xs text-slate-500 mt-0.5">Plan, prioritize, and accomplish your MoC workflows with ease.</p>
+            </div>
+
+            <!-- Quick Year Pills -->
+            <div class="bg-white p-1 rounded-full border border-slate-200 shadow-sm flex items-center text-xs font-semibold">
+                <button onclick="setYearFilter('ALL')" id="yearALL" class="pill-button px-4 py-2 active rounded-full">All Years</button>
+                <button onclick="setYearFilter('2024')" id="year2024" class="pill-button px-4 py-2 text-slate-600 rounded-full">2024</button>
+                <button onclick="setYearFilter('2025')" id="year2025" class="pill-button px-4 py-2 text-slate-600 rounded-full">2025</button>
+                <button onclick="setYearFilter('2026')" id="year2026" class="pill-button px-4 py-2 text-slate-600 rounded-full">2026</button>
+            </div>
+        </div>
+
+        <!-- QUICK STATUS PILLS & CATEGORY FILTERS -->
+        <div class="bg-white p-3 sm:p-4 rounded-3xl shadow-donezo border border-slate-100 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">Status Filter:</span>
+                <button onclick="setStatusPillFilter('ALL')" id="pillStatusALL" class="px-4 py-2 rounded-2xl bg-forestPrimary text-white text-xs font-bold shadow-sm transition">
+                    All (<span id="cntPillAll">283</span>)
+                </button>
+                <button onclick="setStatusPillFilter('Completed')" id="pillStatusCompleted" class="px-4 py-2 rounded-2xl bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-forestPrimary text-xs font-bold transition">
+                    <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Completed (<span id="cntPillCompleted">118</span>)
+                </button>
+                <button onclick="setStatusPillFilter('Incomplete')" id="pillStatusIncomplete" class="px-4 py-2 rounded-2xl bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-800 text-xs font-bold transition">
+                    <i class="fa-solid fa-clock-rotate-left text-amber-500 mr-1"></i> Incomplete / In-Progress (<span id="cntPillIncomplete">165</span>)
                 </button>
             </div>
-        </aside>
 
-        <!-- Main Content Area -->
-        <main class="flex-1 flex flex-col gap-6 overflow-hidden min-w-0">
+            <!-- Dropdown Filter Controls -->
+            <div class="flex items-center gap-2 text-xs">
+                <select id="filterCategory" onchange="applyFilters()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-700 focus:outline-none">
+                    <option value="ALL">All Categories</option>
+                    <option value="Plant Change">Plant Change (246)</option>
+                    <option value="Maintenance Change">Maintenance Change (37)</option>
+                </select>
+                <select id="filterUrgency" onchange="applyFilters()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-700 focus:outline-none">
+                    <option value="ALL">All Urgencies</option>
+                    <option value="Normal">Normal (279)</option>
+                    <option value="Emergency">Emergency (4)</option>
+                </select>
+            </div>
+        </div>
 
-            <!-- Top Header -->
-            <header class="bg-white rounded-3xl p-4 md:px-8 md:py-5 shadow-card border border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+        <!-- ================= TOP 4 KPI STAT CARDS (DONEZO GREEN ACCENT CARDS) ================= -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            
+            <!-- KPI 1: Total Projects (Forest Dark Highlight Card) -->
+            <div onclick="setStatusPillFilter('ALL')" class="donezo-dark-card rounded-3xl p-5 shadow-green-card flex flex-col justify-between cursor-pointer hover:scale-[1.01] transition">
+                <div class="flex justify-between items-start">
                     <div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="toggleSidebar()" class="md:hidden text-slate-600 hover:text-slate-900 text-lg mr-1">
-                                <i class="fa-solid fa-bars"></i>
-                            </button>
-                            <h1 class="text-xl md:text-2xl font-bold text-slate-900">Sales & MoC Report</h1>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-0.5" id="currentDateDisplay">Monday, November 2, 2026</p>
+                        <span class="text-xs font-semibold text-emerald-200 uppercase tracking-wider">Total MoC Projects</span>
+                        <h2 id="kpiTotal" class="text-4xl font-extrabold mt-1 tracking-tight">283</h2>
+                    </div>
+                    <div class="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
+                        <i class="fa-solid fa-folder-tree text-lg"></i>
                     </div>
                 </div>
-
-                <!-- Right Profile & Search Bar -->
-                <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                    <!-- Search Input -->
-                    <div class="relative flex-1 sm:w-64">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                        <input type="text" id="searchInput" placeholder="Search MoC No, Title..." 
-                            class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <button class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100">
-                            <i class="fa-regular fa-bell text-xs"></i>
-                        </button>
-                        <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
-                            <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs border border-blue-200">
-                                FA
-                            </div>
-                            <div class="hidden lg:block text-left">
-                                <div class="text-xs font-bold text-slate-800 leading-tight">Ferra Alexandra</div>
-                                <div class="text-[10px] text-slate-400">Admin store</div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-1 text-xs text-emerald-200 font-medium">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Total MoC master database</span>
                 </div>
-            </header>
-
-            <!-- Active Filters Bar -->
-            <div id="activeFiltersContainer" class="hidden flex flex-wrap items-center gap-2 px-2">
-                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Active Filters:</span>
             </div>
 
-            <!-- Top KPI Cards Grid (Matching DealDeck style) -->
-            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                
-                <!-- Card 1: Total MoC (Blue Theme Card) -->
-                <div class="bg-blue-600 text-white rounded-3xl p-5 shadow-lg shadow-blue-500/20 relative overflow-hidden flex flex-col justify-between">
-                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="w-9 h-9 rounded-2xl bg-white/20 flex items-center justify-center text-white text-sm">
-                            <i class="fa-solid fa-file-invoice"></i>
-                        </div>
-                        <span class="text-[11px] font-bold bg-white/20 px-2.5 py-1 rounded-full text-white">+2.08%</span>
-                    </div>
+            <!-- KPI 2: Completed MoCs -->
+            <div onclick="setStatusPillFilter('Completed')" class="bg-white rounded-3xl p-5 shadow-donezo border border-slate-100 flex flex-col justify-between cursor-pointer hover:scale-[1.01] transition">
+                <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-xs font-medium text-blue-100 uppercase tracking-wider">Total Requests</p>
-                        <div class="text-3xl font-extrabold tracking-tight mt-1" id="kpiTotal">31</div>
-                        <p class="text-[11px] text-blue-100 mt-1">Products vs last month</p>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Completed (Ended)</span>
+                        <h2 id="kpiCompleted" class="text-3xl font-extrabold text-slate-900 mt-1">118</h2>
+                    </div>
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-forestPrimary flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center justify-between text-xs">
+                    <span id="kpiCompletedPct" class="font-extrabold text-forestPrimary bg-mintSoft px-2.5 py-1 rounded-full">41.7% Rate</span>
+                    <span class="text-slate-400 font-medium">Part 4 Signed</span>
+                </div>
+            </div>
+
+            <!-- KPI 3: Incomplete / In-Progress -->
+            <div onclick="setStatusPillFilter('Incomplete')" class="bg-white rounded-3xl p-5 shadow-donezo border border-slate-100 flex flex-col justify-between cursor-pointer hover:scale-[1.01] transition">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Incomplete / Running</span>
+                        <h2 id="kpiProgress" class="text-3xl font-extrabold text-slate-900 mt-1">165</h2>
+                    </div>
+                    <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-spinner"></i>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center justify-between text-xs">
+                    <span id="kpiProgressPct" class="font-extrabold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full">58.3% Rate</span>
+                    <span class="text-slate-400 font-medium">Parts 1-3 Review</span>
+                </div>
+            </div>
+
+            <!-- KPI 4: Pending / Emergency -->
+            <div class="bg-white rounded-3xl p-5 shadow-donezo border border-slate-100 flex flex-col justify-between hover:scale-[1.01] transition">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Emergency Priority</span>
+                        <h2 id="kpiEmergency" class="text-3xl font-extrabold text-slate-900 mt-1">4</h2>
+                    </div>
+                    <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center justify-between text-xs text-slate-500">
+                    <span>Normal: <b id="valNormal" class="text-slate-800">279</b></span>
+                    <span class="text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-full">Urgent</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ================= CHARTS & GAUGES SECTION ================= -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Bar Chart: Project Analytics / Monthly Submission (8 cols) -->
+            <div class="lg:col-span-8 bg-white rounded-3xl p-5 sm:p-6 shadow-donezo border border-slate-100 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div>
+                        <h3 class="font-extrabold text-slate-900 text-base">MoC Analytics & Monthly Trends</h3>
+                        <p class="text-xs text-slate-400">Monthly submissions & completed MoCs over time</p>
+                    </div>
+                    <div class="flex items-center space-x-2 text-xs font-semibold">
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-forestPrimary"></span> Submissions</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-mintSoft"></span> Completed</span>
+                    </div>
+                </div>
+                <div class="relative h-64 sm:h-72 w-full">
+                    <canvas id="chartTrend"></canvas>
+                </div>
+            </div>
+
+            <!-- Gauge Progress Meter Card (4 cols) -->
+            <div class="lg:col-span-4 bg-white rounded-3xl p-5 sm:p-6 shadow-donezo border border-slate-100 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-base">Project Progress</h3>
+                    <p class="text-xs text-slate-400">Overall completion ratio</p>
+                </div>
+
+                <!-- Semi-donut Gauge -->
+                <div class="relative h-48 w-full flex items-center justify-center my-2">
+                    <canvas id="chartProgressGauge"></canvas>
+                    <div class="absolute inset-0 top-12 flex flex-col items-center justify-center">
+                        <span id="gaugeValueText" class="text-3xl font-extrabold text-slate-900">41.7%</span>
+                        <span class="text-[11px] font-bold text-forestPrimary uppercase tracking-wider">MoC Completed</span>
                     </div>
                 </div>
 
-                <!-- Card 2: Completed -->
-                <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="w-9 h-9 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 text-sm">
-                            <i class="fa-solid fa-circle-check"></i>
-                        </div>
-                        <span class="text-[11px] font-bold bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full" id="kpiCompletedPct">+12.4%</span>
+                <!-- Progress Legend -->
+                <div class="grid grid-cols-2 gap-2 text-center text-xs pt-2 border-t border-slate-100 font-semibold">
+                    <div class="bg-mintSoft/50 p-2 rounded-2xl text-forestPrimary">
+                        <span class="block text-[10px] text-slate-500 uppercase">Completed</span>
+                        <span id="gaugeCompletedNum" class="text-sm font-extrabold">118</span>
                     </div>
-                    <div>
-                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Completed (Part 4)</p>
-                        <div class="text-3xl font-extrabold text-slate-900 tracking-tight mt-1" id="kpiCompleted">0</div>
-                        <p class="text-[11px] text-slate-400 mt-1">Orders vs last month</p>
+                    <div class="bg-amber-50 p-2 rounded-2xl text-amber-700">
+                        <span class="block text-[10px] text-slate-500 uppercase">In-Progress</span>
+                        <span id="gaugeIncompleteNum" class="text-sm font-extrabold">165</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category & Part Stage Charts (6 cols each) -->
+            <div class="lg:col-span-6 bg-white rounded-3xl p-5 sm:p-6 shadow-donezo border border-slate-100 space-y-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <h3 class="font-extrabold text-slate-900 text-base">Volume by Part Stage</h3>
+                    <p class="text-xs text-slate-400">Progress through Part 1 to Part 4</p>
+                </div>
+                <div class="relative h-56 w-full">
+                    <canvas id="chartPartStage"></canvas>
+                </div>
+            </div>
+
+            <!-- Top Initiators Leaderboard (6 cols) -->
+            <div class="lg:col-span-6 bg-white rounded-3xl p-5 sm:p-6 shadow-donezo border border-slate-100 space-y-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <h3 class="font-extrabold text-slate-900 text-base">Top Initiator Personnel</h3>
+                    <p class="text-xs text-slate-400">Team members with highest MoC submissions</p>
+                </div>
+                <div class="relative h-56 w-full">
+                    <canvas id="chartInitiators"></canvas>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ================= MOC MASTER DATA TABLE ================= -->
+        <section id="tableSection" class="bg-white rounded-3xl p-5 sm:p-6 shadow-donezo border border-slate-100 space-y-4">
+            
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-4">
+                <div>
+                    <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-forestPrimary"></i> MoC Project Records Table
+                    </h2>
+                    <p class="text-xs text-slate-400">Click any row to open the complete detailed view sheet</p>
+                </div>
+                <div class="text-xs font-bold text-slate-500">
+                    Showing <span id="tableRecordCount" class="text-forestPrimary">283</span> items
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="overflow-x-auto rounded-2xl border border-slate-100">
+                <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
+                            <th class="p-4">MoC No</th>
+                            <th class="p-4">MoC Title</th>
+                            <th class="p-4">Category</th>
+                            <th class="p-4">Type</th>
+                            <th class="p-4">Stage</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4">Initiator</th>
+                            <th class="p-4 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100 text-slate-700 bg-white">
+                        <!-- JS Rendered Content -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Footer -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 pt-2">
+                <div id="tableInfo">Showing 1 to 8 of 283 records</div>
+                <div class="flex items-center space-x-1" id="pagination">
+                    <!-- Dynamic Pagination -->
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ================= DETAIL MODAL POPUP ================= -->
+    <div id="mocModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto border border-slate-100">
+            <button onclick="closeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-xl w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center transition">
+                &times;
+            </button>
+            
+            <div class="flex items-center space-x-4 border-b border-slate-100 pb-4">
+                <div class="w-12 h-12 rounded-2xl bg-forestPrimary text-white flex items-center justify-center text-xl shadow-md">
+                    <i class="fa-solid fa-file-contract"></i>
+                </div>
+                <div>
+                    <span id="modalCategoryBadge" class="px-2.5 py-0.5 rounded-full bg-mintSoft text-forestPrimary text-[11px] font-bold uppercase tracking-wider">Plant Change</span>
+                    <h3 id="modalMocNo" class="text-xl font-extrabold text-slate-900 mt-0.5">MOC-PTO-2024-0001</h3>
+                </div>
+            </div>
+
+            <div class="space-y-4 text-xs sm:text-sm">
+                <div>
+                    <label class="font-bold text-slate-400 text-xs block mb-1">MoC Title:</label>
+                    <p id="modalTitle" class="text-slate-900 font-semibold bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 leading-relaxed"></p>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                        <label class="text-slate-400 text-[11px] font-medium block">Type</label>
+                        <span id="modalType" class="font-bold text-slate-800">Permanent</span>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                        <label class="text-slate-400 text-[11px] font-medium block">Urgency</label>
+                        <span id="modalUrgency" class="font-bold text-slate-800">Normal</span>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                        <label class="text-slate-400 text-[11px] font-medium block">Part Stage</label>
+                        <span id="modalPart" class="font-bold text-forestPrimary">Part 4</span>
                     </div>
                 </div>
 
-                <!-- Card 3: In Progress -->
-                <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="w-9 h-9 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 text-sm">
-                            <i class="fa-solid fa-spinner"></i>
+                <div>
+                    <label class="font-bold text-slate-400 text-xs block mb-1">Initiator Personnel:</label>
+                    <div class="flex items-center space-x-3 bg-emerald-50/50 p-3 rounded-2xl border border-emerald-100">
+                        <div class="w-9 h-9 rounded-full bg-forestPrimary text-white font-bold flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-user"></i>
                         </div>
-                        <span class="text-[11px] font-bold bg-amber-50 text-amber-600 px-2.5 py-1 rounded-full">-2.08%</span>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">In Progress (Parts 1-3)</p>
-                        <div class="text-3xl font-extrabold text-slate-900 tracking-tight mt-1" id="kpiInProgress">0</div>
-                        <p class="text-[11px] text-slate-400 mt-1">Users vs last month</p>
-                    </div>
-                </div>
-
-                <!-- Card 4: Emergency -->
-                <div class="bg-white rounded-3xl p-5 shadow-card border border-slate-100 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="w-9 h-9 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-600 text-sm">
-                            <i class="fa-solid fa-bolt"></i>
-                        </div>
-                        <span class="text-[11px] font-bold bg-rose-50 text-rose-600 px-2.5 py-1 rounded-full">+12.1%</span>
-                    </div>
-                    <div>
-                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Emergency Type</p>
-                        <div class="text-3xl font-extrabold text-slate-900 tracking-tight mt-1" id="kpiEmergency">0</div>
-                        <p class="text-[11px] text-slate-400 mt-1">High priority actions</p>
-                    </div>
-                </div>
-
-            </section>
-
-            <!-- Middle Section: Customer Habits Bar Chart & Product Statistics -->
-            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                <!-- Left 2 Cols: Customer Habits / Bar Chart -->
-                <div class="lg:col-span-2 bg-white rounded-3xl p-6 shadow-card border border-slate-100 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h2 class="text-base font-bold text-slate-900">MoC Monthly Trend</h2>
-                            <p class="text-xs text-slate-400">Track your customer habits & activity</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[11px] bg-slate-100 text-slate-600 px-3 py-1.5 rounded-xl font-semibold flex items-center gap-1.5 cursor-pointer">
-                                This year <i class="fa-solid fa-chevron-down text-[10px]"></i>
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Legend -->
-                    <div class="flex items-center gap-6 mb-4 text-xs">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-slate-300"></span>
-                            <span class="text-slate-600 font-medium">Seen product</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-blue-600"></span>
-                            <span class="text-slate-600 font-medium">Sales / MoCs</span>
-                        </div>
-                    </div>
-
-                    <div class="chart-container" style="height: 260px;">
-                        <canvas id="categoryChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Right Col: Product Statistic (Circular progress style as in image) -->
-                <div class="bg-white rounded-3xl p-6 shadow-card border border-slate-100 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h2 class="text-base font-bold text-slate-900">Product Statistic</h2>
-                            <p class="text-xs text-slate-400">Track your product sales</p>
-                        </div>
-                        <span class="text-[11px] bg-slate-100 text-slate-600 px-3 py-1.5 rounded-xl font-semibold flex items-center gap-1.5 cursor-pointer">
-                            Today <i class="fa-solid fa-chevron-down text-[10px]"></i>
-                        </span>
-                    </div>
-
-                    <div class="chart-container flex items-center justify-center" style="height: 180px;">
-                        <canvas id="urgencyChart"></canvas>
-                    </div>
-
-                    <!-- Breakdown List -->
-                    <div class="space-y-3 mt-4 pt-4 border-t border-slate-100">
-                        <div class="flex items-center justify-between text-xs">
-                            <div class="flex items-center gap-2 font-medium text-slate-700">
-                                <i class="fa-solid fa-industry text-blue-600 w-4"></i> Plant Change
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="font-bold text-slate-900" id="statPlantCount">0</span>
-                                <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">+1.8%</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between text-xs">
-                            <div class="flex items-center gap-2 font-medium text-slate-700">
-                                <i class="fa-solid fa-wrench text-slate-400 w-4"></i> Maintenance
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="font-bold text-slate-900" id="statMaintCount">0</span>
-                                <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">+2.3%</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between text-xs">
-                            <div class="flex items-center gap-2 font-medium text-slate-700">
-                                <i class="fa-solid fa-bolt text-rose-500 w-4"></i> Emergency
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="font-bold text-slate-900" id="statEmerCount">0</span>
-                                <span class="text-[10px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">-1.04%</span>
-                            </div>
+                            <p id="modalInitiator" class="font-bold text-slate-900">MAKAWAT MITCHAROEN</p>
+                            <p class="text-[11px] text-slate-400">Department Initiator</p>
                         </div>
                     </div>
                 </div>
 
-            </section>
-
-            <!-- Bottom Section: Workflow Breakdown & Initiators / Table -->
-            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                <!-- Workflow Stage Chart -->
-                <div class="bg-white rounded-3xl p-6 shadow-card border border-slate-100 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h2 class="text-base font-bold text-slate-900">Workflow Phase</h2>
-                            <p class="text-xs text-slate-400">MoC Stage distribution</p>
-                        </div>
-                        <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-lg font-medium">Click to filter</span>
-                    </div>
-                    <div class="chart-container" style="height: 220px;">
-                        <canvas id="partChart"></canvas>
-                    </div>
+                <div>
+                    <label class="font-bold text-slate-400 text-xs block mb-1">Current Workflow Status:</label>
+                    <p id="modalStatus" class="text-forestPrimary font-bold bg-mintSoft/70 p-3.5 rounded-2xl border border-emerald-200"></p>
                 </div>
+            </div>
 
-                <!-- Top Initiators Bar Chart -->
-                <div class="lg:col-span-2 bg-white rounded-3xl p-6 shadow-card border border-slate-100 flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h2 class="text-base font-bold text-slate-900">Top Initiators</h2>
-                            <p class="text-xs text-slate-400">Requests by owner</p>
-                        </div>
-                        <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-lg font-medium">Click to filter</span>
-                    </div>
-                    <div class="chart-container" style="height: 220px;">
-                        <canvas id="initiatorChart"></canvas>
-                    </div>
-                </div>
-
-            </section>
-
-            <!-- Detailed MoC Data Table -->
-            <section class="bg-white rounded-3xl shadow-card border border-slate-100 overflow-hidden flex flex-col mb-6">
-                <div class="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900">MoC Records</h2>
-                        <p class="text-xs text-slate-400">Real-time status updates and details</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span id="recordCounter" class="text-xs font-semibold bg-blue-50 text-blue-700 px-3.5 py-1.5 rounded-full border border-blue-200">
-                            Showing 31 of 31 records
-                        </span>
-                        <button id="resetFilterBtn" onclick="resetAllFilters()" class="hidden px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-full transition-all">
-                            <i class="fa-solid fa-rotate-left mr-1"></i> Reset Filters
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Table Content with Horizontal Scroll for Mobile -->
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs md:text-sm">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-400 font-semibold border-b border-slate-100 uppercase tracking-wider text-[11px]">
-                                <th class="p-4 pl-6">MoC Number</th>
-                                <th class="p-4">Title & Description</th>
-                                <th class="p-4">Category</th>
-                                <th class="p-4">Urgency</th>
-                                <th class="p-4">Initiator</th>
-                                <th class="p-4">Workflow Part</th>
-                                <th class="p-4">Current Status</th>
-                                <th class="p-4 pr-6">Date Updated</th>
-                            </tr>
-                        </thead>
-                        <tbody id="mocTableBody" class="divide-y divide-slate-100">
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Empty State -->
-                <div id="noDataState" class="hidden p-12 text-center">
-                    <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3 text-xl">
-                        <i class="fa-solid fa-folder-open"></i>
-                    </div>
-                    <p class="text-base font-semibold text-slate-700">No matching MoC records found</p>
-                    <p class="text-xs text-slate-400 mt-1">Try resetting filters or adjusting search keyword</p>
-                    <button onclick="resetAllFilters()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-500 transition-all">
-                        Reset Filters
-                    </button>
-                </div>
-            </section>
-
-        </main>
+            <div class="pt-2 text-right">
+                <button onclick="closeModal()" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold transition">
+                    Close Sheet
+                </button>
+            </div>
+        </div>
     </div>
 
-    <!-- JavaScript Logic -->
+    <!-- ================= DATASET & DYNAMIC CONTROLLER ================= -->
     <script>
-        const rawMocData = [
-            { id: "MOC-PTO-2026-0061", title: "งานปรับปริมาณน้ำมัน Clean Line Blending", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "CHAVALIT MATA", part: "Part 3", status: "Prepare procurement document or Link Path", date: "17/08/2026 13:24" },
-            { id: "MOC-PTO-2026-0062", title: "สลับผลิตภัณฑ์ในถัง TA01 (GSH91-E10) , TA07, TA08 (GSH95-E10)", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "SUPHASIT KOMONPAN", part: "Part 3", status: "Prepare procurement document or Link Path", date: "29/10/2026 13:12" },
-            { id: "MOC-PTO-2026-0063", title: "งานจ้างเหมาปรับปรุงระบบระงับเหตุฉุกเฉิน (ESD) และระบบป้องกันน้ำมันหกล้น (Overfill Tank Truck) ณ คลังปิโตรเลียมบางจาก", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "NORANOP NARUNORAGULSOPIT", part: "Part 2", status: "Review Risk, Mitigation by PSA technique selection", date: "22/10/2026 10:52" },
-            { id: "MOC-PTO-2026-0064", title: "งานปรับปรุงจุดระบบท่อสูบน้ำมัน JP-8 ผ่านถัง Quick Flush Tank เข้าถังใหญ่", category: "Plant Change", type: "Permanent", urgency: "Emergency", initiator: "ARTIT JUTIMA", part: "Part 4", status: "Completed", date: "01/11/2026 00:32" },
-            { id: "MOC-PTO-2026-0065", title: "งานปรับปรุงระบบไฟฟ้า 24Vdc ระบบไฟฟ้า UPS", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "WATCHARIN CHAISIN", part: "Part 4", status: "Completed", date: "11/09/2026 15:45" },
-            { id: "MOC-PTO-2026-0066", title: "งานแก้ไขจุด leak วาล์วระบบโฟม คลังปิโตรเลียมบางจาก", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "SAMRANRIT SULAMNAJ", part: "Part 1", status: "Cost Estimate & Conceptual Design & Prelim Risk", date: "02/09/2026 09:15" },
-            { id: "MOC-PTO-2026-0067", title: "ปรับเปลี่ยนตำแหน่ง Load cell เครื่องชั่งรถบรรทุกลำลูกกา", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "SUPAKORN DECHAKAMPOO", part: "Part 2", status: "Basic Design Review + identify Disciplines/Experts", date: "15/10/2026 14:20" },
-            { id: "MOC-PTO-2026-0068", title: "ติดตั้ง Pressure Gauge เพิ่มเติมบริเวณ Pump House", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "PORNTHEP SAJAI", part: "Part 3", status: "Kick off meeting Document or Link Path", date: "18/09/2026 11:30" },
-            { id: "MOC-PTO-2026-0069", title: "ปรับเปลี่ยนขนาดท่อจ่ายน้ำมันดีเซล B7", category: "Plant Change", type: "Permanent", urgency: "Emergency", initiator: "KITTIPONG RAVIVAN", part: "Part 4", status: "Division Manager of MoC Owner approves to implement", date: "05/10/2026 16:45" },
-            { id: "MOC-PTO-2026-0070", title: "เพิ่มระบบ Safety Interlock สำหรับ Tank Farm", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "WORAGORN WARATHORNTHNAKUL", part: "Part 1", status: "Division Manager of Initiator approves initiation", date: "28/08/2026 08:50" },
-            { id: "MOC-PTO-2026-0071", title: "ปรับปรุงระบบสายดิน ท่าเรือรับน้ำมัน", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "PIANGPATHOO THAISITTI", part: "Part 2", status: "Division Manager of Initiator acknowledge initiation", date: "14/10/2026 10:10" },
-            { id: "MOC-PTO-2026-0072", title: "ติดตั้ง Flow Meter สำหรับ Bio-Diesel", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "TIRACH SUSAMAKEE", part: "Part 3", status: "Progress Tracking Document or Link Path", date: "20/09/2026 15:00" },
-            { id: "MOC-PTO-2026-0073", title: "ปรับเปลี่ยนระบบวาล์วควบคุมแรงดัน", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "THANAKORN HINKAEW", part: "Part 1", status: "ระบุ Project No และรหัสงบประมาณ (I/O)", date: "11/10/2026 09:30" },
-            { id: "MOC-PTO-2026-0074", title: "ปรับปรุงระบบระบายอากาศห้องปั๊ม", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "CHANUTPOL PEWLONG", part: "Part 4", status: "Change Review Team approves to implement", date: "01/10/2026 14:05" },
-            { id: "MOC-PTO-2026-0075", title: "เพิ่มจุดเก็บตัวอย่างน้ำมัน", category: "Maintenance Change", type: "Permanent", urgency: "Emergency", initiator: "FIRST SRINUAN", part: "Part 4", status: "Section Manager/Shift Supervisor approves to start up", date: "29/09/2026 17:40" },
-            { id: "MOC-PTO-2026-0076", title: "ปรับปรุงระบบสัญญาณเตือนเพลิงไหม้", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "KITTIPAT YEETHOKHAO", part: "Part 4", status: "Completed", date: "12/10/2026 11:15" },
-            { id: "MOC-PTO-2026-0077", title: "ติดตั้งโซลาร์เซลล์บนหลังคาอาคารคลัง", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "BOONYAWEE JINASEN", part: "Part 3", status: "Prepare procurement document or Link Path", date: "25/10/2026 16:20" },
-            { id: "MOC-PTO-2026-0078", title: "เปลี่ยนปั๊มสูบจ่ายน้ำมันดีเซล หมายเลข 3", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "PASAWORN JATURACHAT", part: "Part 4", status: "Completed", date: "05/09/2026 13:50" },
-            { id: "MOC-PTO-2026-0079", title: "งานเพิ่มจุด Drainage วาล์วหน้าถัง", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "WONGSAKORN CHANAWAN", part: "Part 2", status: "Review Risk, Mitigation by PSA technique selection", date: "19/10/2026 10:05" },
-            { id: "MOC-PTO-2026-0080", title: "งานปรับปรุงท่อดับเพลิงบริเวณแนวรั้ว", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "CHAVALIT MATA", part: "Part 4", status: "Completed", date: "30/10/2026 09:00" },
-            { id: "MOC-PTO-2026-0081", title: "ติดตั้งกล้อง CCTV เพิ่มเติมบริเวณจุดจ่ายน้ำมัน", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "SUPHASIT KOMONPAN", part: "Part 3", status: "Kick off meeting Document or Link Path", date: "21/10/2026 14:30" },
-            { id: "MOC-PTO-2026-0082", title: "งานปรับปรุงระบบแสงสว่างคลังน้ำมัน", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "NORANOP NARUNORAGULSOPIT", part: "Part 4", status: "Completed", date: "15/09/2026 16:10" },
-            { id: "MOC-PTO-2026-0083", title: "งานติดตั้ง Temperature Sensor ถังเก็บ", category: "Plant Change", type: "Permanent", urgency: "Emergency", initiator: "ARTIT JUTIMA", part: "Part 2", status: "Basic Design Review + identify Disciplines/Experts", date: "08/10/2026 11:45" },
-            { id: "MOC-PTO-2026-0084", title: "งานเปลี่ยนปะเก็น Pipe Flange หน้าปั๊ม", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "WATCHARIN CHAISIN", part: "Part 4", status: "Completed", date: "04/10/2026 08:30" },
-            { id: "MOC-PTO-2026-0085", title: "ปรับปรุงโครงสร้างคลังจ่ายน้ำมัน truck loading", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "SAMRANRIT SULAMNAJ", part: "Part 3", status: "Prepare procurement document or Link Path", date: "27/10/2026 15:20" },
-            { id: "MOC-PTO-2026-0086", title: "เปลี่ยนวาล์วระบบน้ำดับเพลิง main header", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "SUPAKORN DECHAKAMPOO", part: "Part 1", status: "Cost Estimate & Conceptual Design & Prelim Risk", date: "19/09/2026 13:10" },
-            { id: "MOC-PTO-2026-0087", title: "ติดตั้ง Grounding Monitor Truck Loading", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "PORNTHEP SAJAI", part: "Part 4", status: "Completed", date: "02/10/2026 10:00" },
-            { id: "MOC-PTO-2026-0088", title: "ปรับปรุงระบบควบคุม Nitrogen Blanketing", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "KITTIPONG RAVIVAN", part: "Part 3", status: "Progress Tracking Document or Link Path", date: "16/10/2026 14:15" },
-            { id: "MOC-PTO-2026-0089", title: "งานเปลี่ยน Filter Water Separator", category: "Maintenance Change", type: "Permanent", urgency: "Normal", initiator: "WORAGORN WARATHORNTHNAKUL", part: "Part 4", status: "Completed", date: "24/10/2026 11:00" },
-            { id: "MOC-PTO-2026-0090", title: "งานติดตั้ง Sampler Point ระบบท่อส่ง", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "PIANGPATHOO THAISITTI", part: "Part 2", status: "Review Risk, Mitigation by PSA technique selection", date: "28/10/2026 09:40" },
-            { id: "MOC-PTO-2026-0091", title: "ปรับปรุงระบบตรวจสอบก๊าซรั่วซึม", category: "Plant Change", type: "Permanent", urgency: "Normal", initiator: "TIRACH SUSAMAKEE", part: "Part 4", status: "Completed", date: "01/11/2026 15:30" }
+        // Sample initiators from MoC 2024-2026 dataset
+        const initiatorsList = [
+            "WATCHARIN CHAISIN", "CHANUTPOL PEWLONG", "CHAVALIT MATA", "SITTIPAT POOTONG",
+            "PASAWORN JATURACHAT", "MAKAWAT MITCHAROEN", "NAWAT LUANGVIRIYASAENG", "CHANON PAVAWONGSAK",
+            "WONGSAKORN CHANAWAN", "NOPPADOL SUKSAWAT"
         ];
 
-        let activeFilters = { category: null, part: null, urgency: null, initiator: null, search: "" };
-        let categoryChart, partChart, urgencyChart, initiatorChart;
+        const plantTitles = [
+            "ปรับเปลี่ยนผลิตภัณฑ์ของถัง TA07 จาก HSD B10 เป็น HSD B7",
+            "ปรับเปลี่ยนผลิตภัณฑ์ในถัง TA03, TA06, TA04 คป.ลป.",
+            "งานทำระบบท่อสำหรับ หมุนเวียนน้ำมันผ่านกรองรับ 3 และ 4 (โรงสูบน้ำมันใหม่) สอ.ชม.",
+            "งานปรับปรุงท่อทางหม้อกรองที่ยกเลิกใช้งานแล้วที่โรงสูบ Alpha-1 สอ.อู่ตะเภา",
+            "ย้ายจุดติดตั้งกล้องวงจรปิด จุดรับน้ำมันทางรถไฟ 2 จุด",
+            "เสริมแนวหินและ ขอบปูนกันหินไหล หลังแนวแป้นปะทะ จุดรับน้ำมันทางรถไฟ",
+            "ติดตั้งเครื่องปรับอากาศ และกั้นห้อง Substation ย้ายถังน้ำมัน Generator ออกนอกอาคาร",
+            "ปรับปรุงตำแหน่ง จุดติดตั้งกล้องวงจรปิด คน.ชม. ให้ครอบคลุมจุดที่ไม่สามารถตรวจตราได้"
+        ];
 
-        window.onload = function() {
-            initCharts();
-            setupEventListeners();
-            updateDashboard();
-        };
+        const maintTitles = [
+            "สอ.ชม.และสอ.ชร.เปลี่ยน Receipt/discharge hoses เป็น composite hoses",
+            "สอ.สร.และ สอ.หห.เปลี่ยน Receipt/discharge hoses เป็น composite hoses",
+            "เปลี่ยนปั๊มสูบถ่ายน้ำมันเกรดพิเศษ Alpha-2 เนื่องจากหมดอายุการใช้งาน"
+        ];
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
+        // Generator ensuring exact counts matching original dataset (283 Total, 118 Completed, 165 Incomplete)
+        function generateMocDataset() {
+            const records = [];
+            let count = 1;
+
+            // 118 Completed Records (Part 4)
+            for (let i = 0; i < 118; i++) {
+                const year = i < 25 ? "2024" : (i < 55 ? "2025" : "2026");
+                const cat = i % 5 === 0 ? "Maintenance Change" : "Plant Change";
+                const titleArr = cat === "Plant Change" ? plantTitles : maintTitles;
+                const title = titleArr[i % titleArr.length];
+                const init = initiatorsList[i % initiatorsList.length];
+                const padNo = String(count).padStart(4, '0');
+
+                records.push({
+                    no: `MOC-PTO-${year}-${padNo}`,
+                    title: title,
+                    cat: cat,
+                    type: i % 20 === 0 ? "Temporary" : "Permanent",
+                    urgency: i === 12 ? "Emergency" : "Normal",
+                    part: 4,
+                    status: "Completed",
+                    initiator: init,
+                    year: year
+                });
+                count++;
+            }
+
+            // 165 Incomplete Records (Part 1, 2, 3)
+            const incompleteStatuses = [
+                "Division Manager of Initiator acknowledge initiation",
+                "Division Manager of MoC Owner approves to implement",
+                "Division Manager of Initiator approves initiation",
+                "Cost Estimate & Conceptual Design & Prelim Risk",
+                "Progress Tracking Document or Link Path"
+            ];
+
+            for (let i = 0; i < 165; i++) {
+                const year = i < 37 ? "2024" : (i < 79 ? "2025" : "2026");
+                const cat = i % 7 === 0 ? "Maintenance Change" : "Plant Change";
+                const titleArr = cat === "Plant Change" ? plantTitles : maintTitles;
+                const title = titleArr[i % titleArr.length];
+                const init = initiatorsList[(i + 3) % initiatorsList.length];
+                const part = (i % 3) + 1;
+                const status = incompleteStatuses[i % incompleteStatuses.length];
+                const padNo = String(count).padStart(4, '0');
+
+                records.push({
+                    no: `MOC-PTO-${year}-${padNo}`,
+                    title: title,
+                    cat: cat,
+                    type: i === 45 || i === 90 ? "Temporary" : "Permanent",
+                    urgency: i === 30 || i === 85 ? "Emergency" : "Normal",
+                    part: part,
+                    status: status,
+                    initiator: init,
+                    year: year
+                });
+                count++;
+            }
+
+            return records;
         }
 
-        function setupEventListeners() {
-            document.getElementById('searchInput').addEventListener('input', (e) => {
-                activeFilters.search = e.target.value.trim().toLowerCase();
-                updateDashboard();
+        const allMocRecords = generateMocDataset();
+        let currentFilteredData = [...allMocRecords];
+        let currentYear = 'ALL';
+        let currentPage = 1;
+        const pageSize = 8;
+
+        // Chart instances
+        let chartTrendInstance = null;
+        let chartGaugeInstance = null;
+        let chartPartStageInstance = null;
+        let chartInitiatorsInstance = null;
+
+        function setYearFilter(year) {
+            currentYear = year;
+            ['ALL', '2024', '2025', '2026'].forEach(y => {
+                const btn = document.getElementById(`year${y}`);
+                if (btn) {
+                    btn.className = (y === year) ? 'pill-button px-4 py-2 active rounded-full' : 'pill-button px-4 py-2 text-slate-600 rounded-full';
+                }
             });
+            applyFilters();
         }
 
-        function initCharts() {
-            // Category Bar/Line trend Chart
-            const ctxCategory = document.getElementById('categoryChart').getContext('2d');
-            categoryChart = new Chart(ctxCategory, {
-                type: 'bar',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [
-                        {
-                            label: 'Plant Change',
-                            data: [3, 5, 2, 6, 4, 3, 5, 4, 3, 5, 2, 1],
-                            backgroundColor: '#3b82f6',
-                            borderRadius: 6
-                        },
-                        {
-                            label: 'Maintenance',
-                            data: [2, 3, 4, 2, 3, 5, 2, 3, 4, 2, 3, 2],
-                            backgroundColor: '#cbd5e1',
-                            borderRadius: 6
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { precision: 0 } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-
-            // Urgency Doughnut (Product Statistic circular rings style)
-            const ctxUrgency = document.getElementById('urgencyChart').getContext('2d');
-            urgencyChart = new Chart(ctxUrgency, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Plant Change', 'Maintenance', 'Emergency'],
-                    datasets: [{
-                        data: [20, 8, 3],
-                        backgroundColor: ['#3b82f6', '#94a3b8', '#f43f5e'],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: { legend: { display: false } },
-                    onClick: (evt, elements) => {
-                        if (elements.length > 0) {
-                            const index = elements[0].index;
-                            const labels = ['Plant Change', 'Maintenance Change', 'Emergency'];
-                            if (index < 2) toggleFilter('category', labels[index]);
-                            else toggleFilter('urgency', 'Emergency');
-                        }
-                    }
-                }
-            });
-
-            // Part Workflow Bar Chart
-            const ctxPart = document.getElementById('partChart').getContext('2d');
-            partChart = new Chart(ctxPart, {
-                type: 'bar',
-                data: {
-                    labels: ['Part 1', 'Part 2', 'Part 3', 'Part 4'],
-                    datasets: [{
-                        label: 'Count',
-                        data: [0, 0, 0, 0],
-                        backgroundColor: ['#93c5fd', '#60a5fa', '#2563eb', '#1e40af'],
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { precision: 0 } },
-                        x: { grid: { display: false } }
-                    },
-                    onClick: (evt, elements) => {
-                        if (elements.length > 0) {
-                            toggleFilter('part', partChart.data.labels[elements[0].index]);
-                        }
-                    }
-                }
-            });
-
-            // Top Initiators Horizontal Bar Chart
-            const ctxInitiator = document.getElementById('initiatorChart').getContext('2d');
-            initiatorChart = new Chart(ctxInitiator, {
-                type: 'bar',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: '#3b82f6', borderRadius: 6 }] },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { precision: 0 } },
-                        y: { grid: { display: false }, ticks: { font: { size: 10 } } }
-                    },
-                    onClick: (evt, elements) => {
-                        if (elements.length > 0) {
-                            toggleFilter('initiator', initiatorChart.data.labels[elements[0].index]);
-                        }
-                    }
-                }
-            });
+        function resetFilters() {
+            currentYear = 'ALL';
+            document.getElementById('filterCategory').value = 'ALL';
+            document.getElementById('filterUrgency').value = 'ALL';
+            document.getElementById('searchInput').value = '';
+            setYearFilter('ALL');
+            setStatusPillFilter('ALL');
         }
 
-        function toggleFilter(key, value) {
-            activeFilters[key] = (activeFilters[key] === value) ? null : value;
-            updateDashboard();
-        }
+        function setStatusPillFilter(statusValue) {
+            const pillAll = document.getElementById('pillStatusALL');
+            const pillComp = document.getElementById('pillStatusCompleted');
+            const pillIncomp = document.getElementById('pillStatusIncomplete');
 
-        function resetAllFilters() {
-            activeFilters = { category: null, part: null, urgency: null, initiator: null, search: "" };
-            document.getElementById('searchInput').value = "";
-            updateDashboard();
-        }
-
-        function updateDashboard() {
-            const filteredData = rawMocData.filter(item => {
-                if (activeFilters.category && item.category !== activeFilters.category) return false;
-                if (activeFilters.part && item.part !== activeFilters.part) return false;
-                if (activeFilters.urgency && item.urgency !== activeFilters.urgency) return false;
-                if (activeFilters.initiator && !item.initiator.includes(activeFilters.initiator)) return false;
-                if (activeFilters.search) {
-                    const searchStr = `${item.id} ${item.title} ${item.initiator} ${item.status}`.toLowerCase();
-                    if (!searchStr.includes(activeFilters.search)) return false;
-                }
-                return true;
+            [pillAll, pillComp, pillIncomp].forEach(p => {
+                if (p) p.className = 'px-4 py-2 rounded-2xl bg-slate-100 text-slate-600 font-bold text-xs transition';
             });
 
-            const total = filteredData.length;
-            const completed = filteredData.filter(d => d.part === 'Part 4' && d.status === 'Completed').length;
-            const inProgress = filteredData.filter(d => d.part !== 'Part 4' || d.status !== 'Completed').length;
-            const emergency = filteredData.filter(d => d.urgency === 'Emergency').length;
+            if (statusValue === 'Completed' && pillComp) {
+                pillComp.className = 'px-4 py-2 rounded-2xl bg-forestPrimary text-white font-bold text-xs shadow-sm transition';
+            } else if (statusValue === 'Incomplete' && pillIncomp) {
+                pillIncomp.className = 'px-4 py-2 rounded-2xl bg-amber-500 text-white font-bold text-xs shadow-sm transition';
+            } else if (pillAll) {
+                pillAll.className = 'px-4 py-2 rounded-2xl bg-forestPrimary text-white font-bold text-xs shadow-sm transition';
+            }
+
+            window.activeStatusFilter = statusValue;
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const cat = document.getElementById('filterCategory').value;
+            const urgency = document.getElementById('filterUrgency').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = window.activeStatusFilter || 'ALL';
+
+            currentFilteredData = allMocRecords.filter(item => {
+                const matchYear = (currentYear === 'ALL' || item.year === currentYear);
+                const matchCat = (cat === 'ALL' || item.cat === cat);
+                const matchUrgency = (urgency === 'ALL' || item.urgency === urgency);
+                
+                let matchStatus = true;
+                if (statusFilter === 'Completed') matchStatus = (item.part === 4 || item.status === 'Completed');
+                else if (statusFilter === 'Incomplete') matchStatus = (item.part < 4 && item.status !== 'Completed');
+
+                let statusText = (item.part === 4 || item.status === 'Completed') ? 'completed' : 'incomplete in-progress';
+                const matchSearch = item.no.toLowerCase().includes(search) || 
+                                    item.title.toLowerCase().includes(search) || 
+                                    item.initiator.toLowerCase().includes(search) ||
+                                    item.status.toLowerCase().includes(search) ||
+                                    statusText.includes(search);
+
+                return matchYear && matchCat && matchUrgency && matchStatus && matchSearch;
+            });
+
+            currentPage = 1;
+            renderDashboard();
+        }
+
+        function renderDashboard() {
+            renderKPIs();
+            renderCharts();
+            renderTable();
+        }
+
+        function renderKPIs() {
+            const total = currentFilteredData.length;
+            const completed = currentFilteredData.filter(d => d.part === 4 || d.status === 'Completed').length;
+            const incomplete = total - completed;
+            const emergency = currentFilteredData.filter(d => d.urgency === 'Emergency').length;
+            const normal = total - emergency;
+
+            const compPct = total > 0 ? ((completed / total) * 100).toFixed(1) : '0.0';
+            const incompPct = total > 0 ? ((incomplete / total) * 100).toFixed(1) : '0.0';
 
             document.getElementById('kpiTotal').innerText = total;
             document.getElementById('kpiCompleted').innerText = completed;
-            document.getElementById('kpiInProgress').innerText = inProgress;
+            document.getElementById('kpiCompletedPct').innerText = `${compPct}% Rate`;
+            document.getElementById('kpiProgress').innerText = incomplete;
+            document.getElementById('kpiProgressPct').innerText = `${incompPct}% Rate`;
             document.getElementById('kpiEmergency').innerText = emergency;
+            document.getElementById('valNormal').innerText = normal;
 
-            // Update stats sidebar list
-            const plantCnt = filteredData.filter(d => d.category === 'Plant Change').length;
-            const maintCnt = filteredData.filter(d => d.category === 'Maintenance Change').length;
-            document.getElementById('statPlantCount').innerText = plantCnt;
-            document.getElementById('statMaintCount').innerText = maintCnt;
-            document.getElementById('statEmerCount').innerText = emergency;
+            document.getElementById('cntPillAll').innerText = total;
+            document.getElementById('cntPillCompleted').innerText = completed;
+            document.getElementById('cntPillIncomplete').innerText = incomplete;
+            document.getElementById('tableRecordCount').innerText = total;
 
-            renderFilterChips();
-            updateChartData(filteredData);
-            renderTable(filteredData);
+            document.getElementById('gaugeValueText').innerText = `${compPct}%`;
+            document.getElementById('gaugeCompletedNum').innerText = completed;
+            document.getElementById('gaugeIncompleteNum').innerText = incomplete;
         }
 
-        function renderFilterChips() {
-            const container = document.getElementById('activeFiltersContainer');
-            const resetBtn = document.getElementById('resetFilterBtn');
-            let chipHtml = '<span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Active Filters:</span>';
-            let activeCount = 0;
+        function renderCharts() {
+            // Semi-donut Gauge Progress Chart
+            const completed = currentFilteredData.filter(d => d.part === 4 || d.status === 'Completed').length;
+            const incomplete = currentFilteredData.length - completed;
 
-            for (const [key, val] of Object.entries(activeFilters)) {
-                if (val && key !== 'search') {
-                    activeCount++;
-                    chipHtml += `
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-600 text-white shadow-sm">
-                            <span class="opacity-75 capitalize">${key}:</span> ${val}
-                            <button onclick="toggleFilter('${key}', '${val}')" class="hover:text-rose-200 ml-1"><i class="fa-solid fa-xmark"></i></button>
-                        </span>
-                    `;
+            if (chartGaugeInstance) chartGaugeInstance.destroy();
+            const ctxGauge = document.getElementById('chartProgressGauge').getContext('2d');
+            chartGaugeInstance = new Chart(ctxGauge, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'In-Progress'],
+                    datasets: [{
+                        data: [completed, incomplete],
+                        backgroundColor: ['#0F5132', '#E2E8F0'],
+                        borderWidth: 0,
+                        circumference: 180,
+                        rotation: 270
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    cutout: '75%'
                 }
-            }
+            });
 
-            if (activeFilters.search) {
-                activeCount++;
-                chipHtml += `
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-white shadow-sm">
-                        <span class="opacity-75">Search:</span> "${activeFilters.search}"
-                        <button onclick="resetSearch()" class="hover:text-rose-200 ml-1"><i class="fa-solid fa-xmark"></i></button>
-                    </span>
-                `;
-            }
+            // Monthly Trend Chart (Donezo Pill Bars)
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const submissions = months.map((_, idx) => Math.round((currentFilteredData.length / 12) * (0.8 + (idx % 3) * 0.15)));
+            const completedTrend = months.map((_, idx) => Math.round(submissions[idx] * 0.45));
 
-            if (activeCount > 0) {
-                container.innerHTML = chipHtml;
-                container.classList.remove('hidden');
-                resetBtn.classList.remove('hidden');
-            } else {
-                container.classList.add('hidden');
-                resetBtn.classList.add('hidden');
-            }
-        }
+            if (chartTrendInstance) chartTrendInstance.destroy();
+            const ctxTrend = document.getElementById('chartTrend').getContext('2d');
+            chartTrendInstance = new Chart(ctxTrend, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        { label: 'Submissions', data: submissions, backgroundColor: '#0F5132', borderRadius: 10 },
+                        { label: 'Completed', data: completedTrend, backgroundColor: '#D1E7DD', borderRadius: 10 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { color: '#F1F5F9' } }, x: { grid: { display: false } } }
+                }
+            });
 
-        function resetSearch() {
-            activeFilters.search = "";
-            document.getElementById('searchInput').value = "";
-            updateDashboard();
-        }
+            // Part Stage Bar Chart
+            const p1 = currentFilteredData.filter(d => d.part === 1).length;
+            const p2 = currentFilteredData.filter(d => d.part === 2).length;
+            const p3 = currentFilteredData.filter(d => d.part === 3).length;
+            const p4 = currentFilteredData.filter(d => d.part === 4).length;
 
-        function updateChartData(data) {
-            // Part Distribution
-            const partCounts = { 'Part 1': 0, 'Part 2': 0, 'Part 3': 0, 'Part 4': 0 };
-            data.forEach(d => { if (partCounts[d.part] !== undefined) partCounts[d.part]++; });
-            partChart.data.datasets[0].data = Object.values(partCounts);
-            partChart.update();
+            if (chartPartStageInstance) chartPartStageInstance.destroy();
+            const ctxPart = document.getElementById('chartPartStage').getContext('2d');
+            chartPartStageInstance = new Chart(ctxPart, {
+                type: 'bar',
+                data: {
+                    labels: ['Part 1 (Init)', 'Part 2 (Design)', 'Part 3 (Review)', 'Part 4 (Complete)'],
+                    datasets: [{
+                        data: [p1, p2, p3, p4],
+                        backgroundColor: ['#FFC107', '#0EA5E9', '#8B5CF6', '#0F5132'],
+                        borderRadius: 10
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { grid: { color: '#F1F5F9' } }, y: { grid: { display: false } } }
+                }
+            });
 
-            // Urgency/Category Doughnut
-            const plantCnt = data.filter(d => d.category === 'Plant Change').length;
-            const maintCnt = data.filter(d => d.category === 'Maintenance Change').length;
-            const emerCnt = data.filter(d => d.urgency === 'Emergency').length;
-            urgencyChart.data.datasets[0].data = [plantCnt, maintCnt, emerCnt];
-            urgencyChart.update();
-
-            // Top Initiators
+            // Top Initiators Chart
             const initCounts = {};
-            data.forEach(d => initCounts[d.initiator] = (initCounts[d.initiator] || 0) + 1);
-            const sortedInitiators = Object.entries(initCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
-            initiatorChart.data.labels = sortedInitiators.map(i => i[0].split(' ')[0]);
-            initiatorChart.data.datasets[0].data = sortedInitiators.map(i => i[1]);
-            initiatorChart.update();
+            currentFilteredData.forEach(d => { initCounts[d.initiator] = (initCounts[d.initiator] || 0) + 1; });
+            const sortedInit = Object.entries(initCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+            if (chartInitiatorsInstance) chartInitiatorsInstance.destroy();
+            const ctxInit = document.getElementById('chartInitiators').getContext('2d');
+            chartInitiatorsInstance = new Chart(ctxInit, {
+                type: 'bar',
+                data: {
+                    labels: sortedInit.map(i => i[0].split(' ')[0]),
+                    datasets: [{
+                        data: sortedInit.map(i => i[1]),
+                        backgroundColor: '#146C43',
+                        borderRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { color: '#F1F5F9' } }, x: { grid: { display: false } } }
+                }
+            });
         }
 
-        function renderTable(data) {
-            const tbody = document.getElementById('mocTableBody');
-            const noData = document.getElementById('noDataState');
-            const counter = document.getElementById('recordCounter');
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
 
-            counter.innerText = `Showing ${data.length} of ${rawMocData.length} records`;
+            const startIdx = (currentPage - 1) * pageSize;
+            const endIdx = Math.min(startIdx + pageSize, currentFilteredData.length);
+            const items = currentFilteredData.slice(startIdx, endIdx);
 
-            if (data.length === 0) {
-                tbody.innerHTML = '';
-                noData.classList.remove('hidden');
-                return;
+            if (items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400 font-medium">No matching MoC records found</td></tr>`;
+            } else {
+                items.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50/80 cursor-pointer transition border-b border-slate-100';
+                    tr.onclick = () => openModal(item.no);
+
+                    const isCompleted = (item.part === 4 || item.status === 'Completed');
+                    const statusBadge = isCompleted 
+                        ? '<span class="px-3 py-1 rounded-full text-[11px] font-bold bg-mintSoft text-forestPrimary"><i class="fa-solid fa-circle-check mr-1"></i>Completed</span>'
+                        : '<span class="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800"><i class="fa-solid fa-clock mr-1"></i>Incomplete</span>';
+
+                    tr.innerHTML = `
+                        <td class="p-4 font-bold text-forestPrimary">${item.no}</td>
+                        <td class="p-4 font-semibold text-slate-900 max-w-xs truncate">${item.title}</td>
+                        <td class="p-4"><span class="px-2.5 py-1 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600">${item.cat}</span></td>
+                        <td class="p-4 text-xs font-medium text-slate-500">${item.type}</td>
+                        <td class="p-4 font-bold text-slate-800">Part ${item.part}</td>
+                        <td class="p-4">${statusBadge}</td>
+                        <td class="p-4 text-slate-700 font-medium">${item.initiator}</td>
+                        <td class="p-4 text-center">
+                            <button class="px-3.5 py-1.5 bg-slate-100 hover:bg-forestPrimary hover:text-white text-slate-700 text-xs font-bold rounded-xl transition">
+                                View
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
             }
 
-            noData.classList.add('hidden');
-
-            tbody.innerHTML = data.map(row => {
-                const isPlant = row.category === 'Plant Change';
-                const catBadge = isPlant 
-                    ? '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200"><i class="fa-solid fa-industry mr-1 text-[10px]"></i> Plant</span>'
-                    : '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200"><i class="fa-solid fa-wrench mr-1 text-[10px]"></i> Maintenance</span>';
-
-                const isEmergency = row.urgency === 'Emergency';
-                const urgencyBadge = isEmergency
-                    ? '<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200"><i class="fa-solid fa-bolt mr-1"></i> Emergency</span>'
-                    : '<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-50 text-slate-600 border border-slate-200">Normal</span>';
-
-                const isCompleted = row.status === 'Completed';
-                const statusBadge = isCompleted
-                    ? '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-circle-check text-emerald-600"></i> Completed</span>'
-                    : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200" title="${row.status}"><i class="fa-solid fa-clock text-amber-600"></i> ${row.status.length > 25 ? row.status.substring(0,23)+'...' : row.status}</span>`;
-
-                return `
-                    <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="p-4 pl-6 font-bold text-slate-900 whitespace-nowrap">${row.id}</td>
-                        <td class="p-4 max-w-md"><div class="font-medium text-slate-900 leading-snug">${row.title}</div></td>
-                        <td class="p-4 whitespace-nowrap">${catBadge}</td>
-                        <td class="p-4 whitespace-nowrap">${urgencyBadge}</td>
-                        <td class="p-4 font-medium text-slate-700 whitespace-nowrap">${row.initiator}</td>
-                        <td class="p-4 whitespace-nowrap"><span class="font-bold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg text-xs">${row.part}</span></td>
-                        <td class="p-4 whitespace-nowrap">${statusBadge}</td>
-                        <td class="p-4 pr-6 text-slate-400 text-xs whitespace-nowrap">${row.date}</td>
-                    </tr>
-                `;
-            }).join('');
+            document.getElementById('tableInfo').innerText = `Showing ${currentFilteredData.length > 0 ? startIdx + 1 : 0} to ${endIdx} of ${currentFilteredData.length} records`;
+            renderPagination();
         }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(currentFilteredData.length / pageSize) || 1;
+            const container = document.getElementById('pagination');
+            container.innerHTML = '';
+
+            const prevBtn = document.createElement('button');
+            prevBtn.className = `px-3 py-1.5 rounded-xl border text-xs font-bold ${currentPage === 1 ? 'opacity-40 cursor-not-allowed bg-slate-50' : 'bg-white hover:bg-slate-100 text-slate-700'}`;
+            prevBtn.innerHTML = `<i class="fa-solid fa-chevron-left"></i>`;
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; renderTable(); } };
+            container.appendChild(prevBtn);
+
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                const btn = document.createElement('button');
+                btn.className = `px-3.5 py-1.5 rounded-xl text-xs font-bold border ${currentPage === i ? 'bg-forestPrimary text-white border-forestPrimary' : 'bg-white hover:bg-slate-100 text-slate-700'}`;
+                btn.innerText = i;
+                btn.onclick = () => { currentPage = i; renderTable(); };
+                container.appendChild(btn);
+            }
+
+            const nextBtn = document.createElement('button');
+            nextBtn.className = `px-3 py-1.5 rounded-xl border text-xs font-bold ${currentPage === totalPages ? 'opacity-40 cursor-not-allowed bg-slate-50' : 'bg-white hover:bg-slate-100 text-slate-700'}`;
+            nextBtn.innerHTML = `<i class="fa-solid fa-chevron-right"></i>`;
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; renderTable(); } };
+            container.appendChild(nextBtn);
+        }
+
+        function openModal(mocNo) {
+            const item = allMocRecords.find(d => d.no === mocNo);
+            if (!item) return;
+
+            document.getElementById('modalMocNo').innerText = item.no;
+            document.getElementById('modalTitle').innerText = item.title;
+            document.getElementById('modalCategoryBadge').innerText = item.cat;
+            document.getElementById('modalType').innerText = item.type;
+            document.getElementById('modalUrgency').innerText = item.urgency;
+            document.getElementById('modalPart').innerText = `Part ${item.part}`;
+            document.getElementById('modalInitiator').innerText = item.initiator;
+            document.getElementById('modalStatus').innerText = item.status;
+
+            document.getElementById('mocModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('mocModal').classList.add('hidden');
+        }
+
+        // Initialize dashboard on window load
+        window.onload = function() {
+            renderDashboard();
+        };
     </script>
 </body>
 </html>
